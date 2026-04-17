@@ -122,13 +122,25 @@ input[type=number]{-moz-appearance:textfield}
 .group-hdr-players{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);flex:1;margin-left:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* STANDINGS */
-.stand-table{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:12px}
-.stand-table th{color:var(--t3);font-size:9px;letter-spacing:1.2px;text-align:left;padding:5px 6px;border-bottom:1px solid var(--border)}
-.stand-table td{padding:8px 6px;border-bottom:1px solid var(--border);color:var(--t1)}
+.stand-table{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:12px;table-layout:fixed}
+.stand-table col.c-rank{width:28px}
+.stand-table col.c-name{width:auto}
+.stand-table col.c-lv{width:36px}
+.stand-table col.c-w{width:34px}
+.stand-table col.c-l{width:28px}
+.stand-table col.c-score{width:44px}
+.stand-table col.c-wr{width:44px}
+.stand-table col.c-lv-pair{width:56px}
+.stand-table th{color:var(--t3);font-size:9px;letter-spacing:1px;text-align:right;padding:6px 4px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stand-table th.l{text-align:left}
+.stand-table th.c{text-align:center}
+.stand-table td{padding:8px 4px;border-bottom:1px solid var(--border);color:var(--t1);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stand-table td.l{text-align:left}
+.stand-table td.c{text-align:center}
 .stand-table tr:last-child td{border-bottom:none}
 .stand-table .r1 td:first-child{color:var(--acc)}
 .stand-table .tied td:first-child{color:var(--amber)}
-.tr{text-align:right;color:var(--t2)}.pts-cell{text-align:right;color:var(--acc);font-weight:600}
+.stand-table .w-col{color:var(--acc);font-weight:600}
 
 /* PAYMENT */
 .pay-summary{background:linear-gradient(135deg,#101e14,#0c160f);border:1px solid var(--border-lit);border-radius:var(--r);padding:14px;margin-bottom:14px}
@@ -359,9 +371,9 @@ input[type=number]{-moz-appearance:textfield}
 </div></div>
 
 <div class="overlay hidden" id="ov-void-match"><div class="sheet center">
-  <div class="sheet-hdr"><div class="sheet-title">Void Match</div><button class="close-x" onclick="closeOv('void-match')">&#x2715;</button></div>
-  <div class="sheet-body"><p style="color:var(--t2);font-size:14px">Mark this match as void?</p></div>
-  <div class="sheet-foot"><button class="btn b-ghost" onclick="closeOv('void-match')">Cancel</button><button class="btn b-danger" onclick="doVoidMatch()">Void</button></div>
+  <div class="sheet-hdr"><div class="sheet-title">Cancel Match</div><button class="close-x" onclick="closeOv('void-match')">&#x2715;</button></div>
+  <div class="sheet-body"><p style="color:var(--t2);font-size:14px">Mark this match as cancelled? (score 0-0, tidak dihitung)</p></div>
+  <div class="sheet-foot"><button class="btn b-ghost" onclick="closeOv('void-match')">Cancel</button><button class="btn b-danger" onclick="doVoidMatch()">Cancel Match</button></div>
 </div></div>
 
 <div class="overlay hidden" id="ov-reopen-match"><div class="sheet center">
@@ -1004,7 +1016,11 @@ function renderMatchTab(){
     html+='<input type="text" id="match-search-inp" placeholder="Cari nama player..." value="'+esc(S.matchSearch)+'" oninput="onMatchSearch(this.value)"/>';
     if(S.matchSearch)html+='<button class="search-clear" onclick="clearMatchSearch()">&#x2715;</button>';
     html+='</div>';
-    rallies.forEach(function(r){html+=renderRallySec(r,isActive);});
+    rallies.sort(function(a,b){
+      var aC=a.status==='closed'?1:0,bC=b.status==='closed'?1:0;
+      if(aC!==bC)return aC-bC; // active first, closed last
+      return new Date(a.created_at)-new Date(b.created_at); // chronological within group
+    }).forEach(function(r){html+=renderRallySec(r,isActive);});
   }
   el.innerHTML=html;
   // Preserve focus on search input after re-render
@@ -1095,7 +1111,7 @@ function renderMatchCard(m,rally,isActive){
   var rallyClosed=rally.status==='closed';
   var winA=m.result==='team_a',winB=m.result==='team_b';
   var badgeCls=isPend?'bpend':isVoid?'bvoid':'bdone';
-  var badgeTxt=isPend?'PENDING':isVoid?'VOID':'DONE';
+  var badgeTxt=isPend?'PENDING':isVoid?'CANCEL':'DONE';
   var html='<div class="match-card"><div class="match-top"><span class="match-lbl">'+(rally.type==='double'?'2v2':'1v1')+'</span><span class="badge '+badgeCls+'">'+badgeTxt+'</span></div>';
   html+='<div class="match-body">';
   // Team A
@@ -1113,7 +1129,7 @@ function renderMatchCard(m,rally,isActive){
   else if(isDone){html+='<div class="score-block"><div class="s-num'+(winB?' lead':'')+'">'+Number(m.score_b)+'</div></div>';}
   html+='</div></div>';
   if(isActive&&!rallyClosed){
-    if(isPend){html+='<div class="match-actions"><button class="btn b-danger b-sm" onclick="openVoidMatch(\''+m.id+'\')">Void</button><button class="btn b-acc b-sm" onclick="submitMatch(\''+m.id+'\')">Submit</button></div>';}
+    if(isPend){html+='<div class="match-actions"><button class="btn b-danger b-xs" onclick="openVoidMatch(\''+m.id+'\')" style="flex:0 0 auto;padding:5px 10px">Cancel</button><button class="btn b-acc b-sm" onclick="submitMatch(\''+m.id+'\')">Submit</button></div>';}
     else if(isDone||isVoid){html+='<div style="text-align:right;margin-top:6px"><button class="btn b-ghost b-xs" onclick="openReopenMatch(\''+m.id+'\')">Edit</button></div>';}
   }
   html+='</div>';
@@ -1143,7 +1159,7 @@ async function submitMatch(mid){
 
 function openVoidMatch(mid){S.pendingMatchVoid=mid;openOv('void-match');}
 async function doVoidMatch(){
-  try{await DB.voidMatch(S.pendingMatchVoid);var m=C.matches.find(function(x){return x.id===S.pendingMatchVoid;});if(m){m.status='void';m.result='void';}closeOv('void-match');toast('Voided','ok');renderMatchTab();}
+  try{await DB.voidMatch(S.pendingMatchVoid);var m=C.matches.find(function(x){return x.id===S.pendingMatchVoid;});if(m){m.status='void';m.result='void';}closeOv('void-match');toast('Match cancelled','ok');renderMatchTab();}
   catch(err){toast(err.message,'err');}
 }
 
@@ -1522,7 +1538,7 @@ function renderStandingTab(){
   var el=document.getElementById('sub-standing');
   var sess=C.sessions.find(function(s){return s.id===S.activeSid;});
   if(!sess){el.innerHTML='<div class="empty">No session.</div>';return;}
-  var rallies=C.rallies.filter(function(r){return r.session_id===sess.id;});
+  var rallies=C.rallies.filter(function(r){return r.session_id===sess.id;}).sort(function(a,b){var aC=a.status==='closed'?1:0,bC=b.status==='closed'?1:0;if(aC!==bC)return aC-bC;return new Date(a.created_at)-new Date(b.created_at);});
   if(!rallies.length){el.innerHTML='<div class="empty">No rallies yet.</div>';return;}
 
   var html='';
@@ -1530,8 +1546,22 @@ function renderStandingTab(){
 
   // Show Overall only if more than 1 rally
   if(rallies.length>1){
+    // Player masuk Overall Quit hanya kalau quit di SEMUA rally yang dia ikuti
+    var playerJoined={};  // pid -> count rallies joined
+    var playerQuit={};    // pid -> count rallies where they quit
+    rallies.forEach(function(r){
+      var pids=parseIds(r.player_ids);
+      var qids=parseIds(r.quit_pids);
+      pids.forEach(function(id){playerJoined[id]=(playerJoined[id]||0)+1;});
+      qids.forEach(function(id){playerQuit[id]=(playerQuit[id]||0)+1;});
+    });
     var allQuit={};
-    rallies.forEach(function(r){(r.quit_pids||[]).forEach(function(id){allQuit[id]=1;});});
+    Object.keys(playerQuit).forEach(function(id){
+      // Fully quit if quit count equals or exceeds joined count
+      if(playerQuit[id]>=(playerJoined[id]||0)&&playerJoined[id]>0)allQuit[id]=1;
+      // Also if player not in any player_ids but in some quit_pids (orphan quit)
+      if(!playerJoined[id])allQuit[id]=1;
+    });
     var overall=applyH2H(computeStandings(allMs),allMs);
     var overallActive=overall.filter(function(s){return!allQuit[s.player.id];});
     var overallQuit=overall.filter(function(s){return allQuit[s.player.id];});
@@ -1553,7 +1583,7 @@ function renderStandingTab(){
   rallies.forEach(function(rally,idx){
     var rMs=C.matches.filter(function(m){return m.rally_id===rally.id&&m.status==='done';});
     var groups=C.groups.filter(function(g){return g.rally_id===rally.id;});
-    var quitPids=rally.quit_pids||[];
+    var quitPids=parseIds(rally.quit_pids);
     var isDouble=rally.type==='double';
     if(rallies.length>1)html+='<div class="sec-title">'+esc(rally.name)+' '+(isDouble?'&middot; 2v2':'&middot; 1v1')+'</div>';
 
@@ -1785,36 +1815,40 @@ function applyH2HPairs(standings,matches){
 
 function renderPairStandTable(standings){
   if(!standings.length)return'<div class="empty" style="padding:16px">No matches.</div>';
-  var html='<table class="stand-table"><thead><tr><th>#</th><th>Pair</th><th>Lv</th><th class="pts-cell">W</th><th class="tr">L</th><th class="tr">Score</th><th class="tr">WR</th></tr></thead><tbody>';
+  var html='<table class="stand-table">';
+  html+='<colgroup><col class="c-rank"/><col class="c-name"/><col class="c-lv-pair"/><col class="c-w"/><col class="c-l"/><col class="c-score"/><col class="c-wr"/></colgroup>';
+  html+='<thead><tr><th class="l">#</th><th class="l">Pair</th><th class="c">Lv</th><th>W</th><th>L</th><th>Score</th><th>WR</th></tr></thead><tbody>';
   standings.forEach(function(s){
     var pA=pobj(s.pair.a),pB=pobj(s.pair.b);
     var lvA=pA.level_label||levelLabel(pA.level);
     var lvB=pB.level_label||levelLabel(pB.level);
     html+='<tr class="'+(s._rank===1?'r1':s._tied?'tied':'')+'">';
-    html+='<td class="rank-no">'+(s._rank==='-'?'-':(s._tied?'=':'')+s._rank)+'</td>';
-    html+='<td style="font-size:11px;line-height:1.3">'+esc(pA.name)+' &amp;<br/>'+esc(pB.name)+'</td>';
-    html+='<td><span class="badge blv'+lvA+'" style="padding:1px 4px;font-size:9px">'+lvA+'</span> <span class="badge blv'+lvB+'" style="padding:1px 4px;font-size:9px">'+lvB+'</span></td>';
-    html+='<td class="pts-cell">'+s.W+'</td>';
-    html+='<td class="tr">'+s.L+'</td>';
-    html+='<td class="tr">'+s.sf+'</td>';
-    html+='<td class="tr">'+s.wr+'%</td></tr>';
+    html+='<td class="l">'+(s._rank==='-'?'-':(s._tied?'=':'')+s._rank)+'</td>';
+    html+='<td class="l" style="font-size:11px;line-height:1.3;white-space:normal">'+esc(pA.name)+' &amp;<br/>'+esc(pB.name)+'</td>';
+    html+='<td class="c" style="white-space:nowrap"><span class="badge blv'+lvA+'" style="padding:1px 3px;font-size:9px">'+lvA+'</span> <span class="badge blv'+lvB+'" style="padding:1px 3px;font-size:9px">'+lvB+'</span></td>';
+    html+='<td class="w-col">'+s.W+'</td>';
+    html+='<td>'+s.L+'</td>';
+    html+='<td>'+s.sf+'</td>';
+    html+='<td>'+s.wr+'%</td></tr>';
   });
   return html+'</tbody></table>';
 }
 
 function renderStandTable(standings){
   if(!standings.length)return'<div class="empty" style="padding:16px">No matches.</div>';
-  var html='<table class="stand-table"><thead><tr><th>#</th><th>Player</th><th>Lv</th><th class="pts-cell">W</th><th class="tr">L</th><th class="tr">Score</th><th class="tr">WR</th></tr></thead><tbody>';
+  var html='<table class="stand-table">';
+  html+='<colgroup><col class="c-rank"/><col class="c-name"/><col class="c-lv"/><col class="c-w"/><col class="c-l"/><col class="c-score"/><col class="c-wr"/></colgroup>';
+  html+='<thead><tr><th class="l">#</th><th class="l">Player</th><th class="c">Lv</th><th>W</th><th>L</th><th>Score</th><th>WR</th></tr></thead><tbody>';
   standings.forEach(function(s){
     var lv=s.player.level_label||levelLabel(s.player.level);
     html+='<tr class="'+(s._rank===1?'r1':s._tied?'tied':'')+'">';
-    html+='<td class="rank-no">'+(s._rank==='-'?'-':(s._tied?'=':'')+s._rank)+'</td>';
-    html+='<td>'+esc(s.player.name)+'</td>';
-    html+='<td><span class="badge blv'+lv+'" style="padding:1px 5px">'+lv+'</span></td>';
-    html+='<td class="pts-cell">'+s.W+'</td>';
-    html+='<td class="tr">'+s.L+'</td>';
-    html+='<td class="tr">'+s.sf+'</td>';
-    html+='<td class="tr">'+s.wr+'%</td></tr>';
+    html+='<td class="l">'+(s._rank==='-'?'-':(s._tied?'=':'')+s._rank)+'</td>';
+    html+='<td class="l">'+esc(s.player.name)+'</td>';
+    html+='<td class="c"><span class="badge blv'+lv+'" style="padding:1px 5px">'+lv+'</span></td>';
+    html+='<td class="w-col">'+s.W+'</td>';
+    html+='<td>'+s.L+'</td>';
+    html+='<td>'+s.sf+'</td>';
+    html+='<td>'+s.wr+'%</td></tr>';
   });
   return html+'</tbody></table>';
 }
@@ -2463,7 +2497,7 @@ function getExistingPairs(rally) {
 function renderERQuit() {
   var rally = C.rallies.find(function(r){return r.id===ER.rallyId;});
   var el = document.getElementById('er-quit-list');
-  var quitPids = rally.quit_pids || [];
+  var quitPids = parseIds(rally.quit_pids);
 
   if (rally.type === 'single') {
     var pids = parseIds(rally.player_ids).filter(function(id){return quitPids.indexOf(id)===-1;});
@@ -2566,7 +2600,7 @@ async function confirmEditRally() {
         });
         await Promise.all(pendingMs.map(function(m){return deleteMatch(m.id);}));
         // Add to quit_pids
-        var quitPids = (rally.quit_pids || []).concat([pid]);
+        var quitPids = parseIds(rally.quit_pids).concat([pid]);
         await DB.updateRally(ER.rallyId, {quit_pids: quitPids});
         rally.quit_pids = quitPids;
         toast(pname(pid)+' quit -- '+pendingMs.length+' pending deleted, done matches kept','ok');
@@ -2580,7 +2614,7 @@ async function confirmEditRally() {
           return m.rally_id===ER.rallyId && m.status==='pending' && (tA===pairKey||tB===pairKey);
         });
         await Promise.all(pendingMs.map(function(m){return deleteMatch(m.id);}));
-        var quitPids = (rally.quit_pids || []).concat([pairA, pairB]);
+        var quitPids = parseIds(rally.quit_pids).concat([pairA, pairB]);
         await DB.updateRally(ER.rallyId, {quit_pids: quitPids});
         rally.quit_pids = quitPids;
         toast(pname(pairA)+' & '+pname(pairB)+' quit -- '+pendingMs.length+' pending deleted','ok');
