@@ -410,7 +410,13 @@ input[type=number]{-moz-appearance:textfield}
   <div class="sheet-body">
     <div class="fgrp"><label>Bank / E-wallet Account</label><input type="text" id="inp-close-bank" placeholder="BCA 1234567890 a/n Nama"/></div>
 
-    <!-- Latihan prompt (shown if no latihan set AND rally exists) -->
+    <!-- Scenario label -->
+    <div id="cb-scenario-info" class="card" style="margin-bottom:14px;padding:10px 12px;background:var(--bg-raised);border-left:3px solid var(--acc)">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--acc);letter-spacing:1px;margin-bottom:4px" id="cb-scenario-lbl"></div>
+      <div style="font-size:12px;color:var(--t2)" id="cb-scenario-desc"></div>
+    </div>
+
+    <!-- Latihan prompt (Cond 1: rally exists, no latihan) -->
     <div id="cb-latihan-ask" class="fgrp hidden">
       <label>Apakah Ada Sesi Latihan?</label>
       <div class="toggle-row">
@@ -419,18 +425,19 @@ input[type=number]{-moz-appearance:textfield}
       </div>
     </div>
 
-    <!-- Latihan player pick (shown if user said "Ya" and rally exists) -->
+    <!-- Latihan player pick (Cond 1 'yes' OR Cond 3 auto) -->
     <div id="cb-latihan-players" class="fgrp hidden">
-      <label>Player Sesi Latihan (kosong = semua player rally)</label>
-      <div class="psel-list" id="cb-latihan-list" style="max-height:180px"></div>
+      <label id="cb-latihan-players-lbl">Player Sesi Latihan</label>
+      <div class="psel-list" id="cb-latihan-list" style="max-height:220px"></div>
     </div>
 
-    <!-- Time inputs (shown if latihan exists AND rally exists) -->
+    <!-- Time inputs (latihan + rally) -->
     <div id="cb-time-wrap" class="fgrp hidden">
-      <label>Waktu Total Session (menit)</label>
+      <label>Waktu Total Session (menit) <span style="color:var(--red)">*</span></label>
       <input type="number" id="inp-session-min" placeholder="contoh 180" min="1" oninput="updateCBSummary()"/>
-      <label style="margin-top:10px">Waktu Sesi Latihan (menit)</label>
+      <label style="margin-top:10px">Waktu Sesi Latihan (menit) <span style="color:var(--red)">*</span></label>
       <input type="number" id="inp-latihan-min" placeholder="contoh 30" min="1" oninput="updateCBSummary()"/>
+      <div class="hint" id="cb-time-hint">Waktu latihan harus lebih kecil dari total session</div>
     </div>
 
     <div id="close-bill-summary" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--t2);line-height:1.7;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--rsm);padding:12px;margin-top:8px;white-space:pre-wrap"></div>
@@ -587,6 +594,58 @@ input[type=number]{-moz-appearance:textfield}
   <div class="sheet-foot">
     <button class="btn b-ghost" onclick="closeOv('del-session')">Cancel</button>
     <button class="btn b-danger" onclick="doDeleteSession()">Hapus Session</button>
+  </div>
+</div></div>
+
+
+<!-- Payment Detail (view proof + revoke) -->
+<div class="overlay hidden" id="ov-pay-detail"><div class="sheet">
+  <div class="sheet-hdr">
+    <div class="sheet-title" id="pd-title">Payment Detail</div>
+    <button class="close-x" onclick="closeOv('pay-detail')">&#x2715;</button>
+  </div>
+  <div class="sheet-body">
+    <div id="pd-info" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--t2);line-height:1.8;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--rsm);padding:12px;margin-bottom:14px"></div>
+    <div id="pd-proof-wrap" style="margin-bottom:14px"></div>
+    <button class="btn b-danger b-full" onclick="openRevokeModal()">Revoke Payment</button>
+  </div>
+</div></div>
+
+<!-- Revoke Payment modal -->
+<div class="overlay hidden" id="ov-revoke"><div class="sheet center">
+  <div class="sheet-hdr">
+    <div class="sheet-title" style="color:var(--red)">Revoke Payment?</div>
+    <button class="close-x" onclick="closeOv('revoke')">&#x2715;</button>
+  </div>
+  <div class="sheet-body">
+    <p style="font-size:13px;color:var(--t2);margin-bottom:12px">Pilih alasan revoke:</p>
+    <div class="fgrp"><div class="toggle-row" style="flex-direction:column;gap:6px">
+      <div class="tgl on" data-rev-reason="Belum bayar" onclick="setRevokeReason('Belum bayar')">Belum bayar (tidak jadi)</div>
+      <div class="tgl" data-rev-reason="Kurang bayar" onclick="setRevokeReason('Kurang bayar')">Kurang bayar (amount tidak sesuai)</div>
+      <div class="tgl" data-rev-reason="custom" onclick="setRevokeReason('custom')">Alasan lain</div>
+    </div></div>
+    <div class="fgrp hidden" id="rev-custom-wrap"><label>Alasan lain</label><input type="text" id="rev-custom-input" placeholder="Tulis alasan..."/></div>
+    <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);margin-top:10px">Payment record akan ditandai "revoked" tapi tidak dihapus (audit trail). Player kembali unpaid.</p>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn b-ghost" onclick="closeOv('revoke')">Cancel</button>
+    <button class="btn b-danger" id="btn-revoke" onclick="doRevokePayment()">Revoke</button>
+  </div>
+</div></div>
+
+<!-- Reopen Bill confirm -->
+<div class="overlay hidden" id="ov-reopen-bill"><div class="sheet center">
+  <div class="sheet-hdr">
+    <div class="sheet-title" style="color:var(--amber)">Reopen Bill?</div>
+    <button class="close-x" onclick="closeOv('reopen-bill')">&#x2715;</button>
+  </div>
+  <div class="sheet-body">
+    <p style="font-size:14px;color:var(--t2);line-height:1.5">Bill akan dihapus dan session kembali <strong>active</strong>. Semua entry, waktu, dan player latihan tetap tersimpan.</p>
+    <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);margin-top:10px">Edit rally, match, entries, dan latihan akan kembali enabled.</p>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn b-ghost" onclick="closeOv('reopen-bill')">Cancel</button>
+    <button class="btn b-amber" onclick="doReopenBill()" style="background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber)">Reopen</button>
   </div>
 </div></div>
 
@@ -2282,8 +2341,19 @@ function renderPaymentTab(){
       latihanMin: bill.latihan_minutes || 0
     });
     var split = bd.split;
-    var totalPaid=payments.reduce(function(s,p){return s+Number(p.amount);},0);
-    var paidCount=payments.length;
+    // Count only 'paid' (not 'revoked') payments
+    var activePayments = payments.filter(function(p){return p.status!=='revoked';});
+    var totalPaid=activePayments.reduce(function(s,p){return s+Number(p.amount);},0);
+    var paidCount=activePayments.length;
+
+    // Reopen Bill button - only if no active payments
+    if(activePayments.length===0){
+      html+='<div class="card" style="margin-bottom:14px;background:var(--bg-raised);border-left:3px solid var(--amber);padding:12px 14px">';
+      html+='<div class="row-bet" style="gap:10px"><div style="flex:1"><div style="font-family:DM Mono,monospace;font-size:10px;color:var(--amber);letter-spacing:1px;margin-bottom:4px">BELUM ADA PEMBAYARAN</div>';
+      html+='<div style="font-size:12px;color:var(--t2);line-height:1.4">Bisa reopen bill untuk edit entries, waktu, atau player latihan.</div></div>';
+      html+='<button class="btn b-ghost b-sm" onclick="confirmReopenBill()" style="color:var(--amber);border-color:var(--amber);flex-shrink:0">Reopen Bill</button></div>';
+      html+='</div>';
+    }
     var doneMatchCount = bd.doneMatchCount;
     var cancelMatchCount = bd.cancelMatchCount;
 
@@ -2330,8 +2400,11 @@ function renderPaymentTab(){
     var splitPids = Object.keys(split).sort(function(a,b){return split[b]-split[a];});
     splitPids.forEach(function(pid){
       var amount=split[pid];
-      var paid=payments.find(function(p){return p.player_id===pid;});
-      var isPaid=!!paid;
+      // Active (paid) vs revoked history
+      var activePaid=activePayments.find(function(p){return p.player_id===pid;});
+      var allForThis=payments.filter(function(p){return p.player_id===pid;});
+      var revokedForThis=allForThis.filter(function(p){return p.status==='revoked';});
+      var isPaid=!!activePaid;
       var inLatihan = bd.latihanPids.indexOf(pid)>-1;
       var matchCnt = bd.matchSlots[pid]||0;
       // Build detail label
@@ -2346,12 +2419,21 @@ function renderPaymentTab(){
       } else {
         detail = matchCnt+' match';
       }
-      html+='<div class="split-card '+(isPaid?'paid':'unpaid')+'">';
-      html+='<div><div style="font-size:14px;font-weight:500">'+esc(pname(pid))+'</div>';
+      var clickAttr = isPaid ? 'onclick="openPaymentDetail(\''+activePaid.id+'\')" style="cursor:pointer"' : '';
+      html+='<div class="split-card '+(isPaid?'paid':'unpaid')+'" '+clickAttr+'>';
+      html+='<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">'+esc(pname(pid))+'</div>';
       html+='<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--t3);margin-top:1px">'+detail+' = <strong>'+rp(amount)+'</strong></div>';
-      if(isPaid)html+='<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--green);margin-top:2px">via '+paid.method+'</div>';
+      if(isPaid)html+='<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--green);margin-top:2px">via '+activePaid.method+' &middot; tap untuk detail</div>';
+      // Show revoked history if any
+      if(revokedForThis.length>0){
+        html+='<div style="font-family:DM Mono,monospace;font-size:9px;color:var(--amber);margin-top:4px;line-height:1.4">';
+        revokedForThis.forEach(function(rp2){
+          html+='&#x2715; '+rp(Number(rp2.amount))+' revoke'+(rp2.revoke_reason?' ('+esc(rp2.revoke_reason)+')':'')+'<br/>';
+        });
+        html+='</div>';
+      }
       html+='</div>';
-      html+='<div style="text-align:right">';
+      html+='<div style="text-align:right;flex-shrink:0">';
       html+='<div style="font-family:DM Mono,monospace;font-size:13px;color:'+(isPaid?'var(--green)':'var(--red)')+'">'+rp(amount)+'</div>';
       if(isPaid){html+='<span class="badge ba" style="margin-top:4px">PAID</span>';}
       else{html+='<button class="btn b-sm" style="margin-top:4px;background:var(--red-dim);color:var(--red);border:1px solid var(--red)" onclick="openPayConfirm(\''+pid+'\',\''+bill.id+'\','+amount+','+matchCnt+')">Bayar</button>';}
@@ -2362,10 +2444,11 @@ function renderPaymentTab(){
 }
 
 function openAddBillEntry(){
-  var players=getSessionPlayers(S.activeSid);
+  var sid=S.activeSid;
+  var players=getSessionPlayers(sid);
+  // Fallback: if no rally + no latihan yet, show all players (will be auto-created as latihan on close bill)
   if(!players.length){
-    // Show all players if no session players detected
-    players=C.players;
+    players=C.players.slice().sort(function(a,b){return Number(b.level)-Number(a.level);});
   }
   document.getElementById('inp-be-player').innerHTML=players.map(function(p){return'<option value="'+p.id+'">'+esc(p.name)+'</option>';}).join('');
   document.getElementById('inp-be-total').value='';
@@ -2418,30 +2501,7 @@ async function deleteDonation(id){
 }
 
 function openCloseBill(){
-  var sid=S.activeSid;
-  // Check for active rallies
-  var activeRallies=C.rallies.filter(function(r){return r.session_id===sid&&r.status!=='closed';});
-  if(activeRallies.length>0){
-    var names=activeRallies.map(function(r){return r.name;}).join(', ');
-    if(!confirm('Masih ada rally aktif: '+names+'.\n\nSemua rally akan di-close dulu sebelum bill. Lanjut?'))return;
-    // Close all active rallies
-    Promise.all(activeRallies.map(function(r){
-      return DB.closeRally(r.id).then(function(){
-        r.status='closed';
-        // Void pending matches
-        C.matches.forEach(function(m){if(m.rally_id===r.id&&m.status==='pending'){m.status='void';m.result='void';}});
-        return applyLevelUpdate(r.id);
-      });
-    })).then(function(){
-      return DB.getPlayers();
-    }).then(function(players){
-      C.players=players||[];
-      toast('Active rallies closed','ok');
-      _openCloseBillInner();
-      renderMatchTab();renderStandingTab();
-    }).catch(function(err){toast(err.message,'err');});
-    return;
-  }
+  // Validation + active rally handling is in doCloseBill now
   _openCloseBillInner();
 }
 // ============================================================
@@ -2560,51 +2620,102 @@ function _openCloseBillInner(){
   var hasRally = rallies.length > 0;
   var latihanSet = sess && sess.latihan_pids !== null && sess.latihan_pids !== undefined;
 
-  // Reset CB state
+  // Determine scenario:
+  //  1. Rally only (no latihan) -> ask "Ada sesi latihan?"
+  //  2. Rally + latihan already set -> skip ask, show time input (wajib)
+  //  3. No rally -> auto-latihan mode, wajib pilih player (no time needed)
   CB.latihanChoice = null;
   CB.latihanPidsOverride = undefined;
+  CB.scenario = null;
 
   document.getElementById('inp-close-bank').value = '';
   document.getElementById('inp-session-min').value = '';
   document.getElementById('inp-latihan-min').value = '';
 
-  // Show/hide latihan prompt
+  var scenarioLbl = document.getElementById('cb-scenario-lbl');
+  var scenarioDesc = document.getElementById('cb-scenario-desc');
   var askEl = document.getElementById('cb-latihan-ask');
-  if (hasRally && !latihanSet) {
+  var latihanPlayersEl = document.getElementById('cb-latihan-players');
+  var latihanPlayersLbl = document.getElementById('cb-latihan-players-lbl');
+
+  // Reset visibility
+  askEl.classList.add('hidden');
+  latihanPlayersEl.classList.add('hidden');
+  document.getElementById('cb-time-wrap').classList.add('hidden');
+
+  if (!hasRally) {
+    // SCENARIO 3: No rally -> auto-latihan
+    CB.scenario = 'latihan-only';
+    scenarioLbl.textContent = 'MODE: SESI LATIHAN';
+    scenarioDesc.innerHTML = 'Belum ada rally di session ini. Bill akan di-split rata ke player sesi latihan. <strong>Wajib pilih player.</strong>';
+    // Show picker (auto-populate from existing latihan_pids if set)
+    CB.latihanChoice = 'auto';
+    CB.latihanPidsOverride = latihanSet ? parseIds(sess.latihan_pids) : [];
+    if (CB.latihanPidsOverride.length === 0 && latihanSet) {
+      // empty latihan_pids with no rally makes no sense, reset to empty pick
+      CB.latihanPidsOverride = [];
+    }
+    latihanPlayersEl.classList.remove('hidden');
+    latihanPlayersLbl.innerHTML = 'Pilih Player Sesi Latihan <span style="color:var(--red)">*</span>';
+    renderCBLatihanList();
+
+  } else if (hasRally && latihanSet) {
+    // SCENARIO 2: Rally + latihan already set -> only time input needed
+    CB.scenario = 'both-time';
+    scenarioLbl.textContent = 'MODE: RALLY + LATIHAN';
+    var latCount = parseIds(sess.latihan_pids).length;
+    var latNote = latCount > 0 ? latCount + ' player latihan' : 'semua player rally';
+    scenarioDesc.innerHTML = 'Sesi latihan sudah di-set ('+latNote+'). Masukkan waktu total session & waktu latihan untuk split proporsional.';
+    document.getElementById('cb-time-wrap').classList.remove('hidden');
+
+  } else {
+    // SCENARIO 1: Rally only, ask about latihan
+    CB.scenario = 'rally-only';
+    scenarioLbl.textContent = 'MODE: RALLY';
+    scenarioDesc.innerHTML = 'Split bill berdasarkan jumlah match yang dimainkan. Kalau ada sesi latihan tambahan, pilih "Ya".';
     askEl.classList.remove('hidden');
     document.querySelectorAll('[data-cb-latihan]').forEach(function(el){
       el.classList.toggle('on', el.dataset.cbLatihan==='no');
     });
     CB.latihanChoice = 'no';
-  } else {
-    askEl.classList.add('hidden');
   }
 
-  // Show time input if: latihan set AND rally exists
-  updateCBVisibility();
   updateCBSummary();
   openOv('close-bill');
 }
 
 function setCBLatihan(val) {
+  // Only relevant for SCENARIO 1 (rally-only -> ask)
   CB.latihanChoice = val;
   document.querySelectorAll('[data-cb-latihan]').forEach(function(el){
     el.classList.toggle('on', el.dataset.cbLatihan===val);
   });
+  var latihanPlayersEl = document.getElementById('cb-latihan-players');
+  var latihanPlayersLbl = document.getElementById('cb-latihan-players-lbl');
+  var timeWrap = document.getElementById('cb-time-wrap');
+
   if (val === 'yes') {
-    // Show player list (optional)
     CB.latihanPidsOverride = [];
+    latihanPlayersEl.classList.remove('hidden');
+    latihanPlayersLbl.innerHTML = 'Player Sesi Latihan <span style="color:var(--t3);font-weight:normal">(kosong = semua player rally)</span>';
     renderCBLatihanList();
+    timeWrap.classList.remove('hidden');
   } else {
     CB.latihanPidsOverride = undefined;
+    latihanPlayersEl.classList.add('hidden');
+    timeWrap.classList.add('hidden');
   }
-  updateCBVisibility();
   updateCBSummary();
 }
 
 function renderCBLatihanList() {
   var el = document.getElementById('cb-latihan-list');
   if (!el) return;
+  var sid = S.activeSid;
+  var rallies = C.rallies.filter(function(r){return r.session_id===sid;});
+  var hasRally = rallies.length > 0;
+
+  // Player source: all players (for latihan-only), or all (for rally + latihan also allows adding non-rally players)
   var html = '';
   C.players.slice().sort(function(a,b){return Number(b.level)-Number(a.level);}).forEach(function(p){
     var lv = p.level_label || levelLabel(p.level);
@@ -2627,26 +2738,15 @@ function toggleCBLatihanPid(pid) {
   updateCBSummary();
 }
 
-function updateCBVisibility() {
-  var sid = S.activeSid;
-  var sess = C.sessions.find(function(s){return s.id===sid;});
-  var rallies = C.rallies.filter(function(r){return r.session_id===sid;});
-  var hasRally = rallies.length > 0;
-  var latihanSet = (sess && sess.latihan_pids !== null && sess.latihan_pids !== undefined) || CB.latihanChoice === 'yes';
-
-  // Player list only if user said "yes" from prompt
-  document.getElementById('cb-latihan-players').classList.toggle('hidden', CB.latihanChoice !== 'yes');
-  // Time inputs only if both latihan AND rally exist
-  document.getElementById('cb-time-wrap').classList.toggle('hidden', !(latihanSet && hasRally));
-}
-
 function updateCBSummary() {
   var sid = S.activeSid;
   var sessionMin = Number(document.getElementById('inp-session-min').value) || 0;
   var latihanMin = Number(document.getElementById('inp-latihan-min').value) || 0;
+  // Pass override whenever CB has it set (scenarios: latihan-only 'auto', or rally-only 'yes')
+  var override = CB.latihanPidsOverride !== undefined ? CB.latihanPidsOverride : undefined;
   var result = computeBillSplit(sid, {
     sessionMin: sessionMin, latihanMin: latihanMin,
-    latihanPidsOverride: CB.latihanChoice === 'yes' ? (CB.latihanPidsOverride||[]) : undefined
+    latihanPidsOverride: override
   });
 
   var sum = '';
@@ -2667,15 +2767,18 @@ function updateCBSummary() {
   } else if (result.rallyPortion > 0) {
     sum += 'Rally: per match count\n';
     sum += '  '+result.totalMatchSlots+' slot @ '+rp(Math.round(result.ratePerMatchSlot))+'\n';
+  } else if (CB.scenario === 'latihan-only') {
+    sum += '(Pilih minimal 1 player untuk melihat split)\n';
   }
 
-  sum += '\n--- PER PLAYER ---\n';
   var allPids = Object.keys(result.split);
-  allPids.sort(function(a,b){return result.split[b]-result.split[a];});
-  allPids.forEach(function(pid){
-    sum += pname(pid).padEnd ? pname(pid).padEnd(14) : pname(pid)+': ';
-    sum += rp(result.split[pid])+'\n';
-  });
+  if (allPids.length > 0) {
+    sum += '\n--- PER PLAYER ---\n';
+    allPids.sort(function(a,b){return result.split[b]-result.split[a];});
+    allPids.forEach(function(pid){
+      sum += pname(pid) + ': ' + rp(result.split[pid])+'\n';
+    });
+  }
 
   document.getElementById('close-bill-summary').textContent = sum;
   S._closeBillData = {
@@ -2691,30 +2794,77 @@ async function doCloseBill(){
   var sess=C.sessions.find(function(s){return s.id===sid;});
   var rallies=C.rallies.filter(function(r){return r.session_id===sid;});
   var hasRally=rallies.length>0;
-  var latihanSet=(sess&&sess.latihan_pids!==null&&sess.latihan_pids!==undefined)||CB.latihanChoice==='yes';
+  var entries=C.billEntries[sid]||[];
 
-  // Validate time inputs if needed
-  if(latihanSet && hasRally){
-    var sm=Number(document.getElementById('inp-session-min').value);
-    var lm=Number(document.getElementById('inp-latihan-min').value);
-    if(!sm||!lm){toast('Input waktu session & latihan (menit)','err');return;}
-    if(lm>=sm){toast('Waktu latihan harus lebih kecil dari total session','err');return;}
+  // Require at least one bill entry
+  if(!entries.length){toast('Belum ada bill entry','err');return;}
+
+  // Scenario-specific validation
+  var sessionMin=Number(document.getElementById('inp-session-min').value)||0;
+  var latihanMin=Number(document.getElementById('inp-latihan-min').value)||0;
+
+  if(CB.scenario==='latihan-only'){
+    // Scenario 3: No rally, must pick latihan players
+    if(!CB.latihanPidsOverride||CB.latihanPidsOverride.length===0){
+      toast('Pilih player sesi latihan (wajib)','err');return;
+    }
+    // No time needed
+  } else if(CB.scenario==='both-time'){
+    // Scenario 2: Rally + latihan set, require time
+    if(!sessionMin||!latihanMin){toast('Input waktu session & latihan (menit)','err');return;}
+    if(latihanMin>=sessionMin){toast('Waktu latihan harus lebih kecil dari total session','err');return;}
+  } else if(CB.scenario==='rally-only'){
+    // Scenario 1: Rally only, latihanChoice can be 'no' or 'yes'
+    if(CB.latihanChoice==='yes'){
+      if(!sessionMin||!latihanMin){toast('Input waktu session & latihan (menit)','err');return;}
+      if(latihanMin>=sessionMin){toast('Waktu latihan harus lebih kecil dari total session','err');return;}
+    }
+  }
+
+  // Close any active rallies first
+  var activeRallies=rallies.filter(function(r){return r.status!=='closed';});
+  if(activeRallies.length>0){
+    if(!confirm('Masih ada '+activeRallies.length+' rally aktif. Close semua dulu?'))return;
   }
 
   setBtn('btn-do-close-bill',true);
   try{
+    // Close active rallies first (apply level update)
+    for(var i=0;i<activeRallies.length;i++){
+      var r=activeRallies[i];
+      await DB.closeRally(r.id);
+      r.status='closed';
+      // Void pending matches
+      C.matches.forEach(function(m){if(m.rally_id===r.id&&m.status==='pending'){m.status='void';m.result='void';}});
+      await applyLevelUpdate(r.id);
+    }
+    if(activeRallies.length>0){
+      var freshPlayers=await DB.getPlayers();
+      C.players=freshPlayers||C.players;
+    }
+
     var d=S._closeBillData;
-    // If user chose "yes" in close-bill prompt, save latihan_pids to session
-    if(CB.latihanChoice==='yes' && sess && (sess.latihan_pids===null||sess.latihan_pids===undefined)){
+
+    // Save latihan_pids to session if needed
+    var needsLatihanSave=false;
+    var latihanPidsToSave=null;
+    if(CB.scenario==='latihan-only'){
+      latihanPidsToSave=CB.latihanPidsOverride;
+      needsLatihanSave=true;
+    } else if(CB.scenario==='rally-only' && CB.latihanChoice==='yes'){
+      latihanPidsToSave=CB.latihanPidsOverride||[];
+      needsLatihanSave=true;
+    }
+    if(needsLatihanSave){
       await fetch(SUPA_URL+'/rest/v1/sessions?id=eq.'+sid,{
         method:'PATCH',
         headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
-        body:JSON.stringify({latihan_pids:CB.latihanPidsOverride||[]})
+        body:JSON.stringify({latihan_pids:latihanPidsToSave})
       });
-      sess.latihan_pids=(CB.latihanPidsOverride||[]).slice();
+      if(sess)sess.latihan_pids=latihanPidsToSave.slice();
     }
 
-    // Close bill WITH time fields
+    // Build bill payload
     var billPayload={
       session_id:sid,
       bank_account:bank,
@@ -2723,13 +2873,14 @@ async function doCloseBill(){
       status:'closed',
       closed_at:new Date().toISOString(),
     };
-    if(d.sessionMin&&d.latihanMin){
-      billPayload.session_minutes=d.sessionMin;
-      billPayload.latihan_minutes=d.latihanMin;
+    if(sessionMin&&latihanMin){
+      billPayload.session_minutes=sessionMin;
+      billPayload.latihan_minutes=latihanMin;
     }
     if(sess&&sess.latihan_pids!==null&&sess.latihan_pids!==undefined){
       billPayload.latihan_pids=sess.latihan_pids;
     }
+
     var res=await fetch(SUPA_URL+'/rest/v1/bills',{
       method:'POST',
       headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
@@ -2746,6 +2897,7 @@ async function doCloseBill(){
     closeOv('close-bill');toast('Bill closed! Session closed.','ok');
     await loadAndRenderPayment();
     renderMatchTab();
+    renderStandingTab();
     renderSessionList();
   }catch(err){toast(err.message,'err');console.error(err);}
   finally{setBtn('btn-do-close-bill',false);}
@@ -2783,9 +2935,32 @@ async function confirmPay(){
 // ============================================
 // PLAYERS PAGE
 // ============================================
+
+// Returns true if session is in read-only mode (bill closed)
+function isSessLocked(sid){
+  var sess=C.sessions.find(function(s){return s.id===sid;});
+  return !!(sess && sess.status==='closed');
+}
+
 function getSessionPlayers(sid){
+  // Returns all players relevant to this session's billing:
+  // - Players in any rally's player_ids (NOT WO'd, quit still counts)
+  // - Players in session.latihan_pids (if set)
+  // - Players with existing payment records
+  var sess = C.sessions.find(function(s){return s.id===sid;});
   var ids={};
-  C.rallies.filter(function(r){return r.session_id===sid;}).forEach(function(r){parseIds(r.player_ids).forEach(function(id){ids[id]=1;});});
+  C.rallies.filter(function(r){return r.session_id===sid;}).forEach(function(r){
+    // player_ids already excludes WO'd (they get moved to wo_pids)
+    parseIds(r.player_ids).forEach(function(id){ids[id]=1;});
+  });
+  if(sess && sess.latihan_pids!==null && sess.latihan_pids!==undefined){
+    var latPids = parseIds(sess.latihan_pids);
+    if(latPids.length>0){
+      latPids.forEach(function(id){ids[id]=1;});
+    } else {
+      // Empty latihan_pids = "all rally players" which already in ids
+    }
+  }
   (C.playerPayments[sid]||[]).forEach(function(p){ids[p.player_id]=1;});
   return Object.keys(ids).map(pobj).filter(function(p){return p&&p.name;});
 }
@@ -3749,6 +3924,126 @@ async function doDeleteSession() {
     if (S.activeSid === sid) { S.activeSid = null; navigate('session'); }
     renderSessionsList();
   } catch(err) { toast(err.message,'err'); }
+}
+
+
+
+// ============================================================
+// PAYMENT DETAIL + REVOKE + REOPEN BILL
+// ============================================================
+var PD = { paymentId: null, revokeReason: 'Belum bayar' };
+
+function openPaymentDetail(paymentId) {
+  var sid = S.activeSid;
+  var payments = C.playerPayments[sid] || [];
+  var p = payments.find(function(x){return x.id===paymentId;});
+  if (!p) { toast('Payment not found','err'); return; }
+  PD.paymentId = paymentId;
+
+  var player = pobj(p.player_id);
+  document.getElementById('pd-title').textContent = 'Payment: ' + (player ? player.name : 'Unknown');
+  var info = '';
+  info += 'Player:      ' + (player?player.name:'?') + '\n';
+  info += 'Amount:      ' + rp(Number(p.amount)) + '\n';
+  info += 'Method:      ' + (p.method||'?') + '\n';
+  if (p.created_at) {
+    var d = new Date(p.created_at);
+    info += 'Paid at:     ' + d.toLocaleString('id-ID', {dateStyle:'medium',timeStyle:'short'}) + '\n';
+  }
+  document.getElementById('pd-info').textContent = info;
+
+  var proofWrap = document.getElementById('pd-proof-wrap');
+  if (p.proof_url) {
+    proofWrap.innerHTML = '<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--t3);letter-spacing:1px;margin-bottom:6px">PROOF</div>' +
+      '<a href="'+p.proof_url+'" target="_blank" style="display:block"><img src="'+p.proof_url+'" style="max-width:100%;max-height:400px;border-radius:var(--rsm);border:1px solid var(--border);display:block;margin:0 auto"/></a>';
+  } else {
+    proofWrap.innerHTML = '<div style="font-family:DM Mono,monospace;font-size:11px;color:var(--t3);text-align:center;padding:10px">No proof attached (cash payment)</div>';
+  }
+  openOv('pay-detail');
+}
+
+function openRevokeModal() {
+  PD.revokeReason = 'Belum bayar';
+  document.querySelectorAll('[data-rev-reason]').forEach(function(el){
+    el.classList.toggle('on', el.dataset.revReason === 'Belum bayar');
+  });
+  document.getElementById('rev-custom-wrap').classList.add('hidden');
+  document.getElementById('rev-custom-input').value = '';
+  openOv('revoke');
+}
+
+function setRevokeReason(r) {
+  PD.revokeReason = r;
+  document.querySelectorAll('[data-rev-reason]').forEach(function(el){
+    el.classList.toggle('on', el.dataset.revReason === r);
+  });
+  document.getElementById('rev-custom-wrap').classList.toggle('hidden', r !== 'custom');
+}
+
+async function doRevokePayment() {
+  var reason = PD.revokeReason;
+  if (reason === 'custom') {
+    reason = document.getElementById('rev-custom-input').value.trim();
+    if (!reason) { toast('Tulis alasan','err'); return; }
+  }
+  setBtn('btn-revoke', true);
+  try {
+    var payments = C.playerPayments[S.activeSid] || [];
+    var p = payments.find(function(x){return x.id===PD.paymentId;});
+    if (!p) throw new Error('Payment not found');
+
+    // Update status to 'revoked' with reason
+    var res = await fetch(SUPA_URL+'/rest/v1/player_payments?id=eq.'+PD.paymentId, {
+      method: 'PATCH',
+      headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
+      body: JSON.stringify({
+        status: 'revoked',
+        revoke_reason: reason,
+        revoked_at: new Date().toISOString()
+      })
+    });
+    if (!res.ok) throw new Error(await res.text());
+
+    // Update local state
+    p.status = 'revoked';
+    p.revoke_reason = reason;
+    p.revoked_at = new Date().toISOString();
+
+    closeOv('revoke');
+    closeOv('pay-detail');
+    toast('Payment revoked','ok');
+    renderPaymentTab();
+  } catch(err) { toast(err.message,'err'); console.error(err); }
+  finally { setBtn('btn-revoke', false); }
+}
+
+function confirmReopenBill() {
+  openOv('reopen-bill');
+}
+
+async function doReopenBill() {
+  var sid = S.activeSid;
+  var bill = C.bills[sid];
+  if (!bill) { toast('No bill found','err'); return; }
+  try {
+    // Delete the bill record
+    await fetch(SUPA_URL+'/rest/v1/bills?id=eq.'+bill.id, {
+      method: 'DELETE',
+      headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    delete C.bills[sid];
+    // Reopen session
+    await fetch(SUPA_URL+'/rest/v1/sessions?id=eq.'+sid, {
+      method: 'PATCH',
+      headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({status: 'active'})
+    });
+    var sess = C.sessions.find(function(s){return s.id===sid;});
+    if (sess) sess.status = 'active';
+    closeOv('reopen-bill');
+    toast('Bill reopened, session active','ok');
+    renderMatchTab(); renderStandingTab(); renderPaymentTab(); renderSessionList();
+  } catch(err) { toast(err.message,'err'); console.error(err); }
 }
 
 
