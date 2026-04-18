@@ -28,7 +28,6 @@ input[type=number]{-moz-appearance:textfield}
 .topnav{position:fixed;top:0;left:0;right:0;height:var(--nav);background:rgba(12,14,13,.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100}
 .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:4px;color:var(--acc);cursor:pointer}
 .nav-logo-img{height:40px;width:auto;cursor:pointer;object-fit:contain}
-.nav-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;text-align:right;line-height:1.4}
 .botnav{position:fixed;bottom:0;left:0;right:0;height:var(--bot);background:rgba(12,14,13,.97);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;z-index:100}
 .bn-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:none;color:var(--t3);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;transition:120ms;padding:0}
 .bn-btn.on{color:var(--acc)}
@@ -60,8 +59,7 @@ input[type=number]{-moz-appearance:textfield}
 .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.5px;font-weight:500;white-space:nowrap}
 .ba{background:var(--green-dim);color:var(--green)}.bc{background:var(--bg-raised);color:var(--t3)}
 .bpend{background:var(--amber-dim);color:var(--amber)}.bdone{background:var(--acc-dim);color:var(--acc)}
-.bvoid{background:var(--red-dim);color:var(--red)}.bred{background:var(--red-dim);color:var(--red)}
-.blvA{background:#1a2e08;color:#b8f94a;border:1px solid #4a8010}
+.bvoid{background:var(--red-dim);color:var(--red)}.blvA{background:#1a2e08;color:#b8f94a;border:1px solid #4a8010}
 .blvB{background:#0a1e35;color:#5ba4f5;border:1px solid #1a4a80}
 .blvC{background:#1e1a08;color:#f5c842;border:1px solid #806a10}
 .blvD{background:#2e1005;color:#f5813a;border:1px solid #803010}
@@ -76,8 +74,6 @@ input[type=number]{-moz-appearance:textfield}
 .sess-card:hover{background:var(--bg-raised);border-color:var(--border-lit)}
 .sess-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;line-height:1.1}
 .sess-meta{font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);margin-top:2px}
-.sess-stats{display:flex;gap:12px;margin-top:6px}
-.sess-stat{font-family:'DM Mono',monospace;font-size:11px;color:var(--t2)}
 .sess-hero{background:linear-gradient(135deg,#141f10,#0f1a0e);border:1px solid var(--border-lit);border-radius:var(--r);padding:14px;margin-bottom:14px;position:relative;overflow:hidden}
 .sess-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;background:radial-gradient(circle,rgba(184,249,74,.07),transparent 70%);pointer-events:none}
 .sess-hero-name{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;line-height:1;margin-bottom:6px}
@@ -161,9 +157,6 @@ input[type=number]{-moz-appearance:textfield}
 .player-card.debt-card{border-left:3px solid var(--red)}
 .player-card.inactive-card{opacity:.55}
 .p-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;flex-shrink:0;border:2px solid var(--border)}
-.avA{background:#1a2e08;border-color:#4a8010;color:#b8f94a}.avB{background:#0a1e35;border-color:#1a4a80;color:#5ba4f5}
-.avC{background:#1e1a08;border-color:#806a10;color:#f5c842}.avD{background:#2e1005;border-color:#803010;color:#f5813a}
-.avE{background:#2e0d0d;border-color:#801010;color:#ff5f5f}
 .p-info{flex:1;min-width:0}.p-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .p-stats{display:flex;gap:8px;margin-top:3px;flex-wrap:wrap}
 .pst{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3)}.pst span{color:var(--t2)}
@@ -206,6 +199,54 @@ input[type=number]{-moz-appearance:textfield}
 /* MODAL / SHEET */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:flex-end}
 .overlay.hidden{display:none}
+.hidden{display:none !important}
+
+/* TOP NAV - settings gear */
+.topnav{display:flex;align-items:center;justify-content:space-between;padding-right:12px}
+.nav-gear{width:34px;height:34px;background:var(--bg-raised);border:1px solid var(--border);border-radius:50%;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:120ms;flex-shrink:0}
+.nav-gear:hover{border-color:var(--acc);color:var(--acc)}
+.nav-gear.admin-on{border-color:var(--amber);color:var(--amber);background:#2e1a05}
+
+/* SETTINGS MENU */
+.settings-menu{display:flex;flex-direction:column;gap:6px}
+.settings-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--rsm);cursor:pointer;transition:120ms}
+.settings-item:hover{border-color:var(--acc)}
+.settings-item-icon{font-size:22px}
+.settings-item-title{font-size:15px;font-weight:500;color:var(--t1)}
+.settings-item-sub{font-size:11px;color:var(--t3);font-family:'DM Mono',monospace;margin-top:2px}
+.settings-item-arrow{color:var(--t3);font-size:18px}
+
+/* ADMIN PAGE */
+.admin-page{padding:8px 0}
+.admin-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 0 14px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.admin-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--amber)}
+.admin-tabs{display:flex;gap:4px;background:var(--bg-raised);padding:4px;border-radius:var(--rsm);border:1px solid var(--border);margin-bottom:14px;overflow-x:auto}
+.admin-tab{flex:1;padding:8px 12px;text-align:center;border-radius:6px;cursor:pointer;font-size:12px;color:var(--t2);white-space:nowrap;transition:120ms;font-family:'DM Mono',monospace;letter-spacing:1px}
+.admin-tab.on{background:var(--amber);color:#000;font-weight:600}
+
+/* Player row (admin) */
+.admin-player-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:6px}
+.admin-player-row.archived{opacity:.55;border-style:dashed}
+.admin-player-info{flex:1;min-width:0}
+.admin-player-name{font-size:14px;color:var(--t1);font-weight:500}
+.admin-player-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);margin-top:2px}
+.admin-player-actions{display:flex;gap:4px;flex-shrink:0}
+
+/* ACCORDION (user manual) */
+.accord{border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:8px;overflow:hidden;background:var(--bg-card)}
+.accord-hdr{padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-size:14px;color:var(--t1);font-weight:500;transition:120ms}
+.accord-hdr:hover{background:var(--bg-raised)}
+.accord-hdr-icon{font-size:12px;color:var(--t3);transition:200ms}
+.accord.open .accord-hdr-icon{transform:rotate(90deg);color:var(--acc)}
+.accord-body{padding:0 16px 14px;color:var(--t2);font-size:13px;line-height:1.6;display:none}
+.accord.open .accord-body{display:block}
+.accord-body strong{color:var(--t1)}
+.accord-body code{background:var(--bg-raised);padding:1px 6px;border-radius:3px;font-size:11px;color:var(--acc)}
+.accord-body ul{margin:6px 0 10px 16px}
+.accord-body li{margin-bottom:4px}
+
+/* ADMIN TOGGLE BUTTON IN BOTTOM NAV INDICATOR */
+body.admin-unlocked::before{content:'';position:fixed;top:0;left:0;right:0;height:3px;background:var(--amber);z-index:300;pointer-events:none}
 .sheet{background:var(--bg-card);border:1px solid var(--border-lit);border-radius:18px 18px 0 0;width:100%;max-height:92vh;overflow-y:auto;animation:sheetUp 260ms cubic-bezier(.34,1.4,.64,1) both}
 .sheet.center{border-radius:var(--r);margin:auto 16px;animation:popIn 220ms cubic-bezier(.34,1.4,.64,1) both;max-height:84vh}
 @keyframes sheetUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -246,6 +287,7 @@ input[type=number]{-moz-appearance:textfield}
 <body>
 <nav class="topnav">
   <img src="data:image/webp;base64,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" alt="The Bajoel Billiard" class="nav-logo-img" onclick="navigate('session')"/>
+  <button class="nav-gear" id="nav-gear" onclick="openSettings()" title="Settings">&#x2699;</button>
 </nav>
 <div id="app">
   <!-- SESSION PAGE -->
@@ -601,7 +643,7 @@ input[type=number]{-moz-appearance:textfield}
 <!-- Payment Detail (view proof + revoke) -->
 <div class="overlay hidden" id="ov-pay-detail"><div class="sheet">
   <div class="sheet-hdr">
-    <div class="sheet-title" id="pd-title">Payment Detail</div>
+    <div class="sheet-title" id="paydet-title">Payment Detail</div>
     <button class="close-x" onclick="closeOv('pay-detail')">&#x2715;</button>
   </div>
   <div class="sheet-body">
@@ -646,6 +688,102 @@ input[type=number]{-moz-appearance:textfield}
   <div class="sheet-foot">
     <button class="btn b-ghost" onclick="closeOv('reopen-bill')">Cancel</button>
     <button class="btn b-amber" onclick="doReopenBill()" style="background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber)">Reopen</button>
+  </div>
+</div></div>
+
+
+<!-- ===== SETTINGS MENU ===== -->
+<div class="overlay hidden" id="ov-settings"><div class="sheet center">
+  <div class="sheet-hdr"><div class="sheet-title">Settings</div><button class="close-x" onclick="closeOv('settings')">&#x2715;</button></div>
+  <div class="sheet-body">
+    <div class="settings-menu">
+      <div class="settings-item" onclick="closeOv('settings');openManual()">
+        <div style="display:flex;align-items:center;gap:12px"><span class="settings-item-icon">&#x1F4D6;</span>
+          <div><div class="settings-item-title">User Manual</div><div class="settings-item-sub">Cara menggunakan app</div></div>
+        </div>
+        <span class="settings-item-arrow">&#x203A;</span>
+      </div>
+      <div class="settings-item" onclick="closeOv('settings');openAdminLogin()">
+        <div style="display:flex;align-items:center;gap:12px"><span class="settings-item-icon">&#x1F512;</span>
+          <div><div class="settings-item-title">Admin Page</div><div class="settings-item-sub" id="admin-sub-label">Password required</div></div>
+        </div>
+        <span class="settings-item-arrow">&#x203A;</span>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<!-- ===== ADMIN LOGIN ===== -->
+<div class="overlay hidden" id="ov-admin-login"><div class="sheet center">
+  <div class="sheet-hdr"><div class="sheet-title">Admin Access</div><button class="close-x" onclick="closeOv('admin-login')">&#x2715;</button></div>
+  <div class="sheet-body">
+    <p style="color:var(--t2);font-size:13px;margin-bottom:12px">Masukkan password untuk akses admin page</p>
+    <div class="fgrp"><label>Password</label><input type="password" id="inp-admin-pwd" placeholder="" autocomplete="off" onkeydown="if(event.key==='Enter')submitAdminLogin()"/></div>
+    <div id="admin-login-err" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red);margin-top:6px;display:none"></div>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn b-ghost" onclick="closeOv('admin-login')">Cancel</button>
+    <button class="btn b-acc" id="btn-admin-login" onclick="submitAdminLogin()">Unlock</button>
+  </div>
+</div></div>
+
+<!-- ===== USER MANUAL (full sheet) ===== -->
+<div class="overlay hidden" id="ov-manual"><div class="sheet" style="max-height:94vh">
+  <div class="sheet-hdr"><div class="sheet-title">User Manual</div><button class="close-x" onclick="closeOv('manual')">&#x2715;</button></div>
+  <div class="sheet-body" id="manual-body"></div>
+</div></div>
+
+<!-- ===== ADMIN PAGE (full sheet) ===== -->
+<div class="overlay hidden" id="ov-admin"><div class="sheet" style="max-height:94vh">
+  <div class="sheet-hdr">
+    <div class="sheet-title" style="color:var(--amber)">&#x1F512; Admin Page</div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="btn b-ghost b-xs" onclick="lockAdmin()" style="padding:4px 10px;font-size:10px">Lock</button>
+      <button class="close-x" onclick="closeOv('admin')">&#x2715;</button>
+    </div>
+  </div>
+  <div class="sheet-body" style="padding:0 16px 16px">
+    <div class="admin-tabs">
+      <div class="admin-tab on" data-atab="players" onclick="switchATab('players')">PLAYERS</div>
+      <div class="admin-tab" data-atab="archived" onclick="switchATab('archived')">ARCHIVED</div>
+      <div class="admin-tab" data-atab="sessions" onclick="switchATab('sessions')">SESSIONS</div>
+      <div class="admin-tab" data-atab="storage" onclick="switchATab('storage')">STORAGE</div>
+    </div>
+    <div id="admin-content"></div>
+  </div>
+</div></div>
+
+<!-- ===== ADMIN: Edit Player modal ===== -->
+<div class="overlay hidden" id="ov-admin-edit-player"><div class="sheet center">
+  <div class="sheet-hdr"><div class="sheet-title">Edit Player</div><button class="close-x" onclick="closeOv('admin-edit-player')">&#x2715;</button></div>
+  <div class="sheet-body">
+    <div class="fgrp"><label>Name</label><input type="text" id="inp-aep-name"/></div>
+    <div class="fgrp"><label>Level (0-100)</label><input type="number" id="inp-aep-level" min="0" max="100"/></div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);margin-top:4px">Level baru: <span id="aep-lvl-preview">-</span></div>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn b-ghost" onclick="closeOv('admin-edit-player')">Cancel</button>
+    <button class="btn b-acc" id="btn-aep-save" onclick="saveAdminEditPlayer()">Save</button>
+  </div>
+</div></div>
+
+<!-- ===== ADMIN: Force delete session confirm ===== -->
+<div class="overlay hidden" id="ov-admin-force-del"><div class="sheet center">
+  <div class="sheet-hdr"><div class="sheet-title" style="color:var(--red)">Force Delete Session?</div><button class="close-x" onclick="closeOv('admin-force-del')">&#x2715;</button></div>
+  <div class="sheet-body">
+    <p style="font-size:14px;color:var(--t2);line-height:1.5">Session <strong id="afd-sess-name"></strong> akan dihapus <strong style="color:var(--red)">permanen</strong> beserta:</p>
+    <ul style="color:var(--t2);font-size:13px;margin:10px 0 0 18px;line-height:1.6">
+      <li>Semua rally, match, group</li>
+      <li>Bill entries &amp; donations</li>
+      <li>Bill record (termasuk closed)</li>
+      <li>Player payments (termasuk paid + proof)</li>
+      <li>Proof images di Storage</li>
+    </ul>
+    <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--red);margin-top:12px">Tidak bisa di-undo.</p>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn b-ghost" onclick="closeOv('admin-force-del')">Cancel</button>
+    <button class="btn b-danger" id="btn-afd-confirm" onclick="doForceDeleteSession()">Force Delete</button>
   </div>
 </div></div>
 
@@ -961,6 +1099,7 @@ function tnames(ids){return parseIds(ids).map(pname).join(' & ')}
 var _tt;
 function toast(msg,type){var el=document.getElementById('toast');el.textContent=msg;el.className='toast'+(type?' '+type:'');clearTimeout(_tt);_tt=setTimeout(function(){el.className='toast hidden';},2800);}
 function setBtn(id,on){var el=document.getElementById(id);if(!el)return;if(on){el._t=el.innerHTML;el.disabled=true;el.innerHTML='<span class="spin"></span>';}else{el.innerHTML=el._t||el.innerHTML;el.disabled=false;}}
+function setBtnEither(ids,on){for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el){setBtn(ids[i],on);return;}}}
 function openOv(n){document.getElementById('ov-'+n).classList.remove('hidden');}
 function closeOv(n){document.getElementById('ov-'+n).classList.add('hidden');}
 window.addEventListener('click',function(e){if(e.target.classList.contains('overlay'))e.target.classList.add('hidden');});
@@ -1099,26 +1238,6 @@ function renderSessionList(){
     html+='</div>';
   });
   document.getElementById('sessions-list').innerHTML=html;
-}
-
-async function deleteSession(sid,ev){
-  if(ev){ev.stopPropagation();ev.preventDefault();}
-  var s=C.sessions.find(function(x){return x.id===sid;});
-  if(!s){toast('Session not found','err');return;}
-  if(!confirm('Hapus session "'+s.name+'"? Tidak bisa di-undo.'))return;
-  try{
-    // Delete cascade (should already have no matches/bills if we allow delete, but be safe)
-    await fetch(SUPA_URL+'/rest/v1/donation_entries?session_id=eq.'+sid,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-    await fetch(SUPA_URL+'/rest/v1/bill_entries?session_id=eq.'+sid,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-    await fetch(SUPA_URL+'/rest/v1/groups?session_id=eq.'+sid,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-    await fetch(SUPA_URL+'/rest/v1/rallies?session_id=eq.'+sid,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-    await fetch(SUPA_URL+'/rest/v1/sessions?id=eq.'+sid,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
-    C.sessions=C.sessions.filter(function(x){return x.id!==sid;});
-    C.rallies=C.rallies.filter(function(x){return x.session_id!==sid;});
-    C.groups=C.groups.filter(function(x){return x.session_id!==sid;});
-    toast('Session deleted','ok');
-    renderSessionList();
-  }catch(err){toast(err.message,'err');}
 }
 
 function openAddSession(){
@@ -1495,7 +1614,7 @@ function setGenType(el){document.querySelectorAll('[data-gtype]').forEach(functi
 function setGcount(el){document.querySelectorAll('[data-gcount]').forEach(function(b){b.classList.remove('on');});el.classList.add('on');S.genConfig.gcount=parseInt(el.dataset.gcount);}
 
 function renderGenPlayerList(){
-  var sorted=C.players.slice().sort(function(a,b){return Number(b.level)-Number(a.level);});
+  var sorted=C.players.filter(function(p){return !p.archived;}).sort(function(a,b){return Number(b.level)-Number(a.level);});
   var html='';
   sorted.forEach(function(p){
     var lv=p.level_label||levelLabel(p.level);
@@ -1528,12 +1647,12 @@ function updateGenFoot(){
     f.innerHTML='<button class="btn b-ghost" onclick="closeOv(\'gen-rally\')">Cancel</button><button class="btn b-acc" onclick="doGenStep1()">Next</button>';
   } else if(step===2&&cfg.type==='single'){
     // Single: step 2 is confirm
-    f.innerHTML='<button class="btn b-ghost" onclick="showGenStep(1);updateGenFoot()">&#x2190; Back</button><button class="btn b-acc" id="btn-confirm-gen" onclick="confirmGenerate()">Confirm &amp; Start</button>';
+    f.innerHTML='<button class="btn b-ghost" onclick="showGenStep(1);updateGenFoot()">&#x2190; Back</button><button class="btn b-acc" id="btn-confirm-gen-a" onclick="confirmGenerate()">Confirm &amp; Start</button>';
   } else if(step===2&&cfg.type==='double'){
     // Double: step 2 is pair editor
     f.innerHTML='<button class="btn b-ghost" onclick="showGenStep(1);updateGenFoot()">&#x2190; Back</button><button class="btn b-ghost b-sm" onclick="shufflePairs()">&#x1F500; Shuffle</button><button class="btn b-acc" onclick="doGenStep2Double()">Preview Matches &#x2192;</button>';
   } else if(step===3){
-    f.innerHTML='<button class="btn b-ghost" onclick="showGenStep(2);updateGenFoot()">&#x2190; Back</button><button class="btn b-acc" id="btn-confirm-gen" onclick="confirmGenerate()">Confirm &amp; Start</button>';
+    f.innerHTML='<button class="btn b-ghost" onclick="showGenStep(2);updateGenFoot()">&#x2190; Back</button><button class="btn b-acc" id="btn-confirm-gen-b" onclick="confirmGenerate()">Confirm &amp; Start</button>';
   }
 }
 
@@ -1702,12 +1821,6 @@ function doGenStep2Double(){
   updateGenFoot();
 }
 
-function genSingleGrouped(players,n){
-  var matches=[];
-  snakeDraft(players,n).forEach(function(g){matches=matches.concat(rrSingle(g.map(function(p){return p.id;})));});
-  return matches;
-}
-
 function previewMatchesHtml(matches,groups){
   var html='<div style="font-family:DM Mono,monospace;font-size:11px;color:var(--t2);margin-bottom:10px">'+matches.length+' matches generated</div>';
   if(groups&&groups.length>1){
@@ -1829,7 +1942,7 @@ function snakeDraft(players,n){
 }
 
 async function confirmGenerate(){
-  setBtn('btn-confirm-gen',true);
+  setBtnEither(['btn-confirm-gen-a','btn-confirm-gen-b'],true);
   var sid=S.activeSid;
   var cfg=S.genConfig;
   var rn=C.rallies.filter(function(r){return r.session_id===sid;}).length+1;
@@ -1909,7 +2022,7 @@ async function confirmGenerate(){
     toast('Rally generated!','ok');
     renderMatchTab();renderStandingTab();renderPaymentTab();
   }catch(err){toast(err.message,'err');}
-  finally{setBtn('btn-confirm-gen',false);}
+  finally{setBtnEither(['btn-confirm-gen-a','btn-confirm-gen-b'],false);}
 }
 
 function openQuickAdd(){openOv('quick-player');}
@@ -2448,7 +2561,7 @@ function openAddBillEntry(){
   var players=getSessionPlayers(sid);
   // Fallback: if no rally + no latihan yet, show all players (will be auto-created as latihan on close bill)
   if(!players.length){
-    players=C.players.slice().sort(function(a,b){return Number(b.level)-Number(a.level);});
+    players=C.players.filter(function(p){return !p.archived;}).sort(function(a,b){return Number(b.level)-Number(a.level);});
   }
   document.getElementById('inp-be-player').innerHTML=players.map(function(p){return'<option value="'+p.id+'">'+esc(p.name)+'</option>';}).join('');
   document.getElementById('inp-be-total').value='';
@@ -2717,7 +2830,7 @@ function renderCBLatihanList() {
 
   // Player source: all players (for latihan-only), or all (for rally + latihan also allows adding non-rally players)
   var html = '';
-  C.players.slice().sort(function(a,b){return Number(b.level)-Number(a.level);}).forEach(function(p){
+  C.players.filter(function(p){return !p.archived;}).sort(function(a,b){return Number(b.level)-Number(a.level);}).forEach(function(p){
     var lv = p.level_label || levelLabel(p.level);
     var sel = (CB.latihanPidsOverride||[]).indexOf(p.id) > -1;
     html += '<div class="psel-item'+(sel?' selected':'')+'" onclick="toggleCBLatihanPid(\''+p.id+'\')" style="cursor:pointer">';
@@ -3005,7 +3118,9 @@ async function loadAndRenderPlayers(){
 }
 
 function renderPlayers(){
-  var inactiveIds=C.players.filter(function(p){return isInactive(p.id);}).map(function(p){return p.id;});
+  // Exclude archived players from main players tab
+  var visiblePlayers = C.players.filter(function(p){return !p.archived;});
+  var inactiveIds=visiblePlayers.filter(function(p){return isInactive(p.id);}).map(function(p){return p.id;});
   function sortList(list){
     return list.map(function(p){return{p:p,st:getPlayerStats(p.id)};}).sort(function(a,b){
       if(b.st.rallyW!==a.st.rallyW)return b.st.rallyW-a.st.rallyW;
@@ -3013,8 +3128,8 @@ function renderPlayers(){
       return Number(b.p.level)-Number(a.p.level);
     });
   }
-  var active=sortList(C.players.filter(function(p){return inactiveIds.indexOf(p.id)===-1;}));
-  var inactive=sortList(C.players.filter(function(p){return inactiveIds.indexOf(p.id)>-1;}));
+  var active=sortList(visiblePlayers.filter(function(p){return inactiveIds.indexOf(p.id)===-1;}));
+  var inactive=sortList(visiblePlayers.filter(function(p){return inactiveIds.indexOf(p.id)>-1;}));
   document.getElementById('player-count').textContent=active.length+' active \u00b7 '+inactive.length+' inactive';
 
   function card(item){
@@ -3742,7 +3857,7 @@ function renderLatihanList() {
   }
 
   var html = '';
-  C.players.slice().sort(function(a,b){return Number(b.level)-Number(a.level);}).forEach(function(p){
+  C.players.filter(function(p){return !p.archived;}).sort(function(a,b){return Number(b.level)-Number(a.level);}).forEach(function(p){
     var lv = p.level_label || levelLabel(p.level);
     var sel = LAT.pids.indexOf(p.id) > -1;
     html += '<div class="psel-item'+(sel?' selected':'')+'" onclick="toggleLatihanPid(\''+p.id+'\')" style="cursor:pointer">';
@@ -3884,14 +3999,6 @@ function deleteSessionFromEdit() {
 // ============================================================
 // DELETE SESSION
 // ============================================================
-function openDeleteSessionConfirm(sid) {
-  var sess = C.sessions.find(function(s){return s.id===sid;});
-  if (!sess) return;
-  S._delSid = sid;
-  document.getElementById('del-sess-name').textContent = sess.name;
-  openOv('del-session');
-}
-
 async function doDeleteSession() {
   var sid = S._delSid;
   if (!sid) return;
@@ -3941,7 +4048,7 @@ function openPaymentDetail(paymentId) {
   PD.paymentId = paymentId;
 
   var player = pobj(p.player_id);
-  document.getElementById('pd-title').textContent = 'Payment: ' + (player ? player.name : 'Unknown');
+  document.getElementById('paydet-title').textContent = 'Payment: ' + (player ? player.name : 'Unknown');
   var info = '';
   info += 'Player:      ' + (player?player.name:'?') + '\n';
   info += 'Amount:      ' + rp(Number(p.amount)) + '\n';
@@ -4047,7 +4154,452 @@ async function doReopenBill() {
 }
 
 
+
+// ============================================================
+// ADMIN MODE + SETTINGS + USER MANUAL
+// Password: bajoeladmin (hashed SHA-256)
+// ============================================================
+var ADMIN = {
+  pwdHash: 'bf9ed5020e55afa60229413d2e610168c462f7f9bace666a1fefe40c5844ec57',
+  timeoutHours: 24,
+  currentTab: 'players',
+  editingPid: null,
+  forceDelSid: null
+};
+
+// SHA-256 async (Web Crypto)
+async function sha256(str){
+  var buf = new TextEncoder().encode(str);
+  var hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+
+function isAdminUnlocked(){
+  var t = localStorage.getItem('bajoel_admin_unlock');
+  if(!t) return false;
+  var age = Date.now() - Number(t);
+  if(age > ADMIN.timeoutHours*3600*1000){
+    localStorage.removeItem('bajoel_admin_unlock');
+    return false;
+  }
+  return true;
+}
+
+function applyAdminUIState(){
+  var isUnlocked = isAdminUnlocked();
+  var gear = document.getElementById('nav-gear');
+  if(gear) gear.classList.toggle('admin-on', isUnlocked);
+  document.body.classList.toggle('admin-unlocked', isUnlocked);
+  var subLabel = document.getElementById('admin-sub-label');
+  if(subLabel) subLabel.textContent = isUnlocked ? 'Unlocked' : 'Password required';
+}
+
+function openSettings(){
+  applyAdminUIState();
+  openOv('settings');
+}
+
+function openAdminLogin(){
+  if(isAdminUnlocked()){
+    openAdminPage();
+    return;
+  }
+  document.getElementById('inp-admin-pwd').value = '';
+  document.getElementById('admin-login-err').style.display = 'none';
+  openOv('admin-login');
+  setTimeout(function(){document.getElementById('inp-admin-pwd').focus();}, 100);
+}
+
+async function submitAdminLogin(){
+  var pwd = document.getElementById('inp-admin-pwd').value;
+  if(!pwd) return;
+  setBtn('btn-admin-login', true);
+  try {
+    var hash = await sha256(pwd);
+    if(hash === ADMIN.pwdHash){
+      localStorage.setItem('bajoel_admin_unlock', Date.now().toString());
+      closeOv('admin-login');
+      applyAdminUIState();
+      toast('Admin unlocked', 'ok');
+      setTimeout(openAdminPage, 150);
+    } else {
+      var err = document.getElementById('admin-login-err');
+      err.textContent = 'Password salah';
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    toast('Error: '+e.message, 'err');
+  } finally {
+    setBtn('btn-admin-login', false);
+  }
+}
+
+function lockAdmin(){
+  localStorage.removeItem('bajoel_admin_unlock');
+  applyAdminUIState();
+  closeOv('admin');
+  toast('Admin locked', 'ok');
+}
+
+function openAdminPage(){
+  if(!isAdminUnlocked()){ openAdminLogin(); return; }
+  switchATab('players');
+  openOv('admin');
+}
+
+function switchATab(tab){
+  ADMIN.currentTab = tab;
+  document.querySelectorAll('[data-atab]').forEach(function(el){
+    el.classList.toggle('on', el.dataset.atab === tab);
+  });
+  renderAdminTab();
+}
+
+function renderAdminTab(){
+  var el = document.getElementById('admin-content');
+  if(ADMIN.currentTab === 'players') el.innerHTML = renderAdminPlayers(false);
+  else if(ADMIN.currentTab === 'archived') el.innerHTML = renderAdminPlayers(true);
+  else if(ADMIN.currentTab === 'sessions') el.innerHTML = renderAdminSessions();
+  else if(ADMIN.currentTab === 'storage') renderAdminStorage();
+}
+
+function renderAdminPlayers(showArchived){
+  var players = C.players.slice().sort(function(a,b){
+    return Number(b.level)-Number(a.level);
+  }).filter(function(p){
+    return showArchived ? !!p.archived : !p.archived;
+  });
+  var html = '<div style="font-family:DM Mono,monospace;font-size:11px;color:var(--t3);margin-bottom:10px">'+players.length+(showArchived?' archived':' active')+' player</div>';
+  if(!players.length){
+    html += '<div class="empty">No players.</div>';
+    return html;
+  }
+  players.forEach(function(p){
+    var lv = p.level_label || levelLabel(p.level);
+    html += '<div class="admin-player-row'+(p.archived?' archived':'')+'">';
+    html += '<span class="badge blv'+lv+'" style="padding:3px 7px">'+lv+'</span>';
+    html += '<div class="admin-player-info"><div class="admin-player-name">'+esc(p.name)+'</div>';
+    html += '<div class="admin-player-meta">Level: '+p.level+(p.archived?' &middot; archived':'')+'</div></div>';
+    html += '<div class="admin-player-actions">';
+    if(p.archived){
+      html += '<button class="btn b-ghost b-xs" onclick="restorePlayer(\''+p.id+'\')" style="color:var(--green);border-color:var(--green)">Restore</button>';
+    } else {
+      html += '<button class="btn b-ghost b-xs" onclick="openAdminEditPlayer(\''+p.id+'\')">Edit</button>';
+      html += '<button class="btn b-ghost b-xs" onclick="archivePlayer(\''+p.id+'\')" style="color:var(--red);border-color:var(--red-dim)">Archive</button>';
+    }
+    html += '</div></div>';
+  });
+  return html;
+}
+
+function openAdminEditPlayer(pid){
+  var p = pobj(pid);
+  if(!p) return;
+  ADMIN.editingPid = pid;
+  document.getElementById('inp-aep-name').value = p.name;
+  document.getElementById('inp-aep-level').value = p.level;
+  document.getElementById('aep-lvl-preview').textContent = (p.level_label||levelLabel(p.level));
+  document.getElementById('inp-aep-level').oninput = function(){
+    var v = Number(this.value);
+    if(!isNaN(v)) document.getElementById('aep-lvl-preview').textContent = levelLabel(v);
+  };
+  openOv('admin-edit-player');
+}
+
+async function saveAdminEditPlayer(){
+  var pid = ADMIN.editingPid;
+  var name = document.getElementById('inp-aep-name').value.trim();
+  var lv = Number(document.getElementById('inp-aep-level').value);
+  if(!name){toast('Name required','err');return;}
+  if(isNaN(lv) || lv < 0 || lv > 100){toast('Level 0-100','err');return;}
+  setBtn('btn-aep-save', true);
+  try {
+    var newLabel = levelLabel(lv);
+    await fetch(SUPA_URL+'/rest/v1/players?id=eq.'+pid, {
+      method:'PATCH',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({name: name, level: lv, level_label: newLabel})
+    });
+    var p = C.players.find(function(x){return x.id===pid;});
+    if(p){ p.name = name; p.level = lv; p.level_label = newLabel; }
+    closeOv('admin-edit-player');
+    toast('Player updated','ok');
+    renderAdminTab();
+    if(typeof renderPlayers==='function') renderPlayers();
+  } catch(err){ toast(err.message,'err'); }
+  finally { setBtn('btn-aep-save', false); }
+}
+
+async function archivePlayer(pid){
+  var p = pobj(pid);
+  if(!p) return;
+  if(!confirm('Archive '+p.name+'?\n\nPlayer akan hilang dari daftar aktif tapi tetap muncul di history.')) return;
+  try {
+    await fetch(SUPA_URL+'/rest/v1/players?id=eq.'+pid, {
+      method:'PATCH',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({archived: true, archived_at: new Date().toISOString()})
+    });
+    p.archived = true;
+    toast(p.name+' archived','ok');
+    renderAdminTab();
+  } catch(err){ toast(err.message,'err'); }
+}
+
+async function restorePlayer(pid){
+  var p = pobj(pid);
+  if(!p) return;
+  try {
+    await fetch(SUPA_URL+'/rest/v1/players?id=eq.'+pid, {
+      method:'PATCH',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({archived: false, archived_at: null})
+    });
+    p.archived = false;
+    toast(p.name+' restored','ok');
+    renderAdminTab();
+  } catch(err){ toast(err.message,'err'); }
+}
+
+function renderAdminSessions(){
+  var sessions = C.sessions.slice().sort(function(a,b){
+    return new Date(b.date||b.created_at)-new Date(a.date||a.created_at);
+  });
+  var html = '<div style="font-family:DM Mono,monospace;font-size:11px;color:var(--t3);margin-bottom:10px">'+sessions.length+' sessions total</div>';
+  if(!sessions.length){ html += '<div class="empty">No sessions.</div>'; return html; }
+  sessions.forEach(function(s){
+    var bill = C.bills[s.id];
+    var billStatus = bill ? (bill.status==='closed'?'CLOSED':'OPEN') : 'NO BILL';
+    var billColor = bill && bill.status==='closed' ? 'var(--t3)' : 'var(--acc)';
+    html += '<div class="admin-player-row">';
+    html += '<div class="admin-player-info"><div class="admin-player-name">'+esc(s.name)+'</div>';
+    html += '<div class="admin-player-meta">'+fmtDate(s.date)+' &middot; <span style="color:'+billColor+'">'+billStatus+'</span></div></div>';
+    html += '<div class="admin-player-actions">';
+    html += '<button class="btn b-ghost b-xs" onclick="openForceDelSession(\''+s.id+'\')" style="color:var(--red);border-color:var(--red)">Force Delete</button>';
+    html += '</div></div>';
+  });
+  return html;
+}
+
+function openForceDelSession(sid){
+  var s = C.sessions.find(function(x){return x.id===sid;});
+  if(!s) return;
+  ADMIN.forceDelSid = sid;
+  document.getElementById('afd-sess-name').textContent = s.name;
+  openOv('admin-force-del');
+}
+
+async function doForceDeleteSession(){
+  var sid = ADMIN.forceDelSid;
+  if(!sid) return;
+  setBtn('btn-afd-confirm', true);
+  try {
+    // 1. Delete proof images from storage first
+    var payments = C.playerPayments[sid] || [];
+    var proofUrls = payments.map(function(p){return p.proof_url;}).filter(Boolean);
+    for(var i=0; i<proofUrls.length; i++){
+      try {
+        var path = extractStoragePath(proofUrls[i]);
+        if(path){
+          await fetch(SUPA_URL+'/storage/v1/object/proofs/'+encodeURIComponent(path), {
+            method:'DELETE',
+            headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+          });
+        }
+      } catch(e){ console.error('Failed to delete proof:', e); }
+    }
+
+    // 2. Cascade delete DB records
+    var endpoints = [
+      'player_payments?session_id=eq.'+sid,
+      'bills?session_id=eq.'+sid,
+      'bill_entries?session_id=eq.'+sid,
+      'donation_entries?session_id=eq.'+sid,
+      'matches?session_id=eq.'+sid,
+      'groups?session_id=eq.'+sid,
+      'rallies?session_id=eq.'+sid,
+      'sessions?id=eq.'+sid
+    ];
+    for(var i=0; i<endpoints.length; i++){
+      await fetch(SUPA_URL+'/rest/v1/'+endpoints[i], {
+        method:'DELETE', headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      });
+    }
+
+    // 3. Clear local cache
+    C.sessions = C.sessions.filter(function(s){return s.id!==sid;});
+    C.rallies = C.rallies.filter(function(r){return r.session_id!==sid;});
+    C.matches = C.matches.filter(function(m){return m.session_id!==sid;});
+    C.groups = C.groups.filter(function(g){return g.session_id!==sid;});
+    if(C.bills) delete C.bills[sid];
+    if(C.billEntries) delete C.billEntries[sid];
+    if(C.donationEntries) delete C.donationEntries[sid];
+    if(C.playerPayments) delete C.playerPayments[sid];
+
+    closeOv('admin-force-del');
+    toast('Session force deleted','ok');
+    if(S.activeSid === sid){ S.activeSid = null; navigate('session'); }
+    renderSessionList();
+    renderAdminTab();
+  } catch(err){ toast(err.message,'err'); console.error(err); }
+  finally { setBtn('btn-afd-confirm', false); }
+}
+
+function extractStoragePath(url){
+  // e.g. https://xxx.supabase.co/storage/v1/object/public/proofs/xxx/yyy.jpg
+  // Returns: xxx/yyy.jpg
+  var match = url.match(/\/storage\/v1\/object\/(?:public|sign)\/proofs\/(.+?)(?:\?|$)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+// ============================================================
+// STORAGE CLEANUP (hybrid: age > 30 days AND orphan)
+// ============================================================
+async function renderAdminStorage(){
+  var el = document.getElementById('admin-content');
+  el.innerHTML = '<div class="loading-full"><span class="spin"></span> Loading storage...</div>';
+  try {
+    var list = await listStorageFiles();
+    var now = Date.now();
+    var ageLimit = 30*24*3600*1000; // 30 days
+
+    // Build set of referenced proof URLs from all active payments
+    var referencedPaths = {};
+    Object.keys(C.playerPayments||{}).forEach(function(sid){
+      (C.playerPayments[sid]||[]).forEach(function(p){
+        if(p.proof_url && p.status !== 'revoked'){
+          var path = extractStoragePath(p.proof_url);
+          if(path) referencedPaths[path] = true;
+        }
+      });
+    });
+
+    var candidates = [];
+    list.forEach(function(file){
+      // file has: name, created_at, metadata, updated_at
+      var createdAt = new Date(file.created_at || file.updated_at).getTime();
+      var age = now - createdAt;
+      var fullPath = file.name; // may be nested like session-id/file.jpg
+      var isOrphan = !referencedPaths[fullPath];
+      var isOld = age > ageLimit;
+      if(isOld && isOrphan){
+        candidates.push({
+          name: fullPath,
+          created: new Date(createdAt).toLocaleDateString('id-ID'),
+          ageDays: Math.floor(age/86400000),
+          size: file.metadata && file.metadata.size ? file.metadata.size : 0
+        });
+      }
+    });
+
+    var html = '<div style="font-family:DM Mono,monospace;font-size:11px;color:var(--t3);margin-bottom:10px">';
+    html += 'Total files: '+list.length+' &middot; Orphan + &gt;30d: '+candidates.length;
+    html += '</div>';
+    html += '<div class="card" style="background:var(--bg-raised);padding:10px 12px;margin-bottom:10px;border-left:3px solid var(--amber)">';
+    html += '<div style="font-size:12px;color:var(--t2);line-height:1.5">Files yang akan dihapus: usia &gt; 30 hari <strong>DAN</strong> tidak direferensikan payment aktif (non-revoked).</div>';
+    html += '</div>';
+    if(!candidates.length){
+      html += '<div class="empty">Tidak ada file yang perlu dihapus.</div>';
+    } else {
+      html += '<button class="btn b-danger b-sm b-full" onclick="doCleanupStorage()" style="margin-bottom:12px">Hapus '+candidates.length+' File</button>';
+      candidates.forEach(function(f){
+        html += '<div class="admin-player-row">';
+        html += '<div class="admin-player-info"><div class="admin-player-name" style="font-size:12px;font-family:DM Mono,monospace;word-break:break-all">'+esc(f.name)+'</div>';
+        html += '<div class="admin-player-meta">'+f.created+' &middot; '+f.ageDays+' hari &middot; '+(f.size?Math.round(f.size/1024)+'KB':'?')+'</div></div>';
+        html += '</div>';
+      });
+    }
+
+    el.innerHTML = html;
+    ADMIN._storageCandidates = candidates;
+  } catch(err){
+    el.innerHTML = '<div class="empty">Error loading storage: '+esc(err.message)+'</div>';
+    console.error(err);
+  }
+}
+
+async function listStorageFiles(){
+  // List all files recursively in 'proofs' bucket
+  var allFiles = [];
+  async function listFolder(prefix){
+    var res = await fetch(SUPA_URL+'/storage/v1/object/list/proofs', {
+      method:'POST',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({prefix: prefix, limit: 1000, offset: 0, sortBy:{column:'name',order:'asc'}})
+    });
+    if(!res.ok) throw new Error('List failed: '+res.status);
+    var items = await res.json();
+    for(var i=0; i<items.length; i++){
+      var it = items[i];
+      if(it.id === null || (it.metadata === null && !it.id)){
+        // folder
+        await listFolder((prefix?prefix+'/':'')+it.name);
+      } else {
+        allFiles.push({
+          name: (prefix?prefix+'/':'')+it.name,
+          created_at: it.created_at,
+          updated_at: it.updated_at,
+          metadata: it.metadata
+        });
+      }
+    }
+  }
+  await listFolder('');
+  return allFiles;
+}
+
+async function doCleanupStorage(){
+  var candidates = ADMIN._storageCandidates || [];
+  if(!candidates.length) return;
+  if(!confirm('Hapus '+candidates.length+' file permanen?')) return;
+  var failed = 0;
+  for(var i=0; i<candidates.length; i++){
+    try {
+      var res = await fetch(SUPA_URL+'/storage/v1/object/proofs/'+encodeURIComponent(candidates[i].name), {
+        method:'DELETE',
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      });
+      if(!res.ok) failed++;
+    } catch(e){ failed++; }
+  }
+  toast((candidates.length-failed)+' dihapus'+(failed>0?', '+failed+' gagal':''), failed>0?'warn':'ok');
+  renderAdminStorage();
+}
+
+// ============================================================
+// USER MANUAL
+// ============================================================
+function openManual(){
+  renderManual();
+  openOv('manual');
+}
+
+function renderManual(){
+  var sections = [
+    {t:'Getting Started', b:'<p>Aplikasi ini untuk tracking sesi billiard komunitas: generate rally, catat match, hitung level player, split bill.</p><p><strong>Struktur:</strong></p><ul><li><strong>Session</strong> = satu hari main</li><li><strong>Rally</strong> = pertandingan dalam sesi (single/double)</li><li><strong>Match</strong> = game individual dalam rally</li><li><strong>Sesi Latihan</strong> = main bebas tanpa rally format, ikut split bill</li></ul>'},
+    {t:'Membuat Session', b:'<p>Di halaman SESSIONS, klik <strong>+ New Session</strong>:</p><ul><li>Nama otomatis terisi format <code>JUMAT - 17 APRIL 2026</code> (bisa diubah)</li><li>Tanggal default hari ini</li><li>Venue opsional</li></ul><p>Setelah session dibuat, kamu akan masuk ke halaman detail dengan 3 tab: MATCH / STANDING / PAYMENT.</p>'},
+    {t:'Generate Rally', b:'<p>Di tab MATCH, klik <strong>+ Rally</strong>. 2 step:</p><p><strong>Step 1 - Pilih type &amp; player:</strong></p><ul><li>Single (1v1) atau Double (2v2)</li><li>Checklist player yang ikut (3+ untuk single, 4+ untuk double)</li><li>Jumlah group (1-3) untuk pembagian pemain by level</li></ul><p><strong>Step 2 - Preview:</strong></p><ul><li>Lihat pembagian group (single: by level gap; double: random)</li><li>Untuk double, bisa edit pairing manual</li><li>Tap player untuk pindah group</li><li>Klik <strong>Regenerate</strong> kalau mau acak ulang</li></ul>'},
+    {t:'Main Match', b:'<p>Di tiap rally:</p><ul><li><strong>Score +/-</strong>: tombol untuk update skor live</li><li><strong>Submit</strong>: tekan kalau match sudah selesai, pilih pemenang</li><li><strong>Cancel</strong>: match tidak dihitung (misal gangguan)</li></ul><p><strong>Edit Rally</strong> (sebelum close):</p><ul><li><strong>REMOVE</strong>: WO (keluar + semua match player ini dihapus) atau QUIT (keluar di tengah, match yg sudah done tetap dihitung)</li><li><strong>ADD</strong>: tambah player baru ke rally</li><li><strong>DELETE</strong>: hapus rally</li></ul>'},
+    {t:'Close Rally', b:'<p>Setelah semua match selesai, klik <strong>Close Rally</strong>. Yang terjadi:</p><ul><li>Pending match jadi cancel otomatis</li><li>Level player di-update berdasarkan hasil</li><li>Rally Winner ditentukan dari standing</li><li>Rally tidak bisa diedit lagi (kecuali session reopen)</li></ul>'},
+    {t:'Sesi Latihan', b:'<p>Main bebas tanpa rally. Klik <strong>+ Sesi Latihan</strong> di hero session.</p><p><strong>Kasus A - Belum ada rally:</strong> Wajib pilih player yang ikut. Bill dibagi rata ke mereka.</p><p><strong>Kasus B - Sudah ada rally:</strong> Opsional pilih player. Kalau kosong = semua player rally dianggap ikut latihan.</p>'},
+    {t:'Close Bill &amp; Split', b:'<p>Di tab PAYMENT, tambah <strong>Bill Entry</strong> (tagihan dari bayar sewa/makanan) dan <strong>Donation</strong> (potongan).</p><p>Klik <strong>Close Bill</strong>. Ada 3 skenario:</p><ul><li><strong>Rally saja:</strong> tanya apakah ada latihan. Tidak &rarr; split per match. Ya &rarr; pilih player latihan + input waktu</li><li><strong>Rally + Latihan:</strong> input waktu total session &amp; waktu latihan. Split proporsional</li><li><strong>Latihan saja:</strong> split rata ke player latihan</li></ul><p><strong>Formula waktu:</strong><br><code>latihan_minutes / session_minutes = rasio latihan</code><br>Porsi latihan dibagi rata ke player latihan. Sisanya dibagi per match count.</p>'},
+    {t:'Payment: Bayar &amp; Revoke', b:'<p>Setiap player lihat amount masing-masing di Payment tab.</p><ul><li><strong>Bayar:</strong> pilih method (transfer/cash). Transfer wajib upload bukti</li><li><strong>Klik card PAID</strong>: lihat detail + gambar bukti</li><li><strong>Revoke</strong>: kalau salah input. Pilih alasan. Record tidak hilang, cuma di-tandai. Player bisa bayar ulang</li><li><strong>Reopen Bill</strong>: kalau belum ada yang bayar sama sekali, bisa reopen untuk edit entries</li></ul>'},
+    {t:'Level System', b:'<p>Label level:</p><ul><li><strong>A</strong>: 85-100 (expert)</li><li><strong>B</strong>: 69-84</li><li><strong>C</strong>: 50-68</li><li><strong>D</strong>: 25-49</li><li><strong>E</strong>: 0-24 (pemula)</li></ul><p><strong>Perubahan per match (single):</strong><br>Beda level &ge;20: menang +0/kalah -2 (favorit), menang +2/kalah 0 (underdog)<br>Beda level &lt;20: &plusmn;1</p><p>Double: flat &plusmn;1. Cancel/quit/WO tidak affect level.</p>'},
+    {t:'Edit Session &amp; Delete', b:'<p>Klik ikon &#x270E; di hero session untuk edit nama, tanggal, venue.</p><p><strong>Hapus Session</strong> (di modal edit): hanya aktif kalau bill belum closed. Kalau sudah closed dan harus dihapus, butuh admin.</p>'},
+    {t:'Tips', b:'<ul><li>Nama session auto-fill dengan format hari+tanggal Indonesia</li><li>Edit level player manual butuh admin</li><li>Storage upload dibersihkan otomatis oleh admin kalau sudah &gt;30 hari dan tidak di-reference</li><li>Data di-sync real-time ke cloud (Supabase)</li></ul>'}
+  ];
+  var html = '';
+  sections.forEach(function(s,i){
+    html += '<div class="accord" id="acc-'+i+'"><div class="accord-hdr" onclick="document.getElementById(\'acc-'+i+'\').classList.toggle(\'open\')">';
+    html += '<span>'+s.t+'</span><span class="accord-hdr-icon">&#x25B6;</span></div>';
+    html += '<div class="accord-body">'+s.b+'</div></div>';
+  });
+  document.getElementById('manual-body').innerHTML = html;
+}
+
+
 boot();
+applyAdminUIState();
 </script>
 </body>
 </html>
