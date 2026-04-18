@@ -301,7 +301,7 @@ input[type=number]{-moz-appearance:textfield}
   <div class="sheet-hdr"><div class="sheet-title">New Session</div><button class="close-x" onclick="closeOv('add-session')">&#x2715;</button></div>
   <div class="sheet-body">
     <div class="fgrp"><label>Session Name</label><input type="text" id="inp-sname" placeholder="Friday Night Rack"/></div>
-    <div class="fgrp"><label>Date</label><input type="date" id="inp-sdate"/></div>
+    <div class="fgrp"><label>Date</label><input type="date" id="inp-sdate" onchange="onSessDateChange()"/></div>
     <div class="fgrp"><label>Venue</label><input type="text" id="inp-svenue" placeholder="Q-Ball Club Surabaya"/></div>
   </div>
   <div class="sheet-foot"><button class="btn b-ghost" onclick="closeOv('add-session')">Cancel</button><button class="btn b-acc" id="btn-create-session" onclick="createSession()">Create</button></div>
@@ -450,49 +450,50 @@ input[type=number]{-moz-appearance:textfield}
     <button class="close-x" onclick="closeOv('edit-rally')">&#x2715;</button>
   </div>
   <div class="sheet-body">
-    <!-- tabs: WO / Quit / Add -->
+    <!-- tabs: Remove / Add / Delete -->
     <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px">
-      <div class="stab on" id="er-tab-wo" onclick="switchEditTab('wo',this)" style="flex:1;border-bottom-width:2px;font-size:10px">WO</div>
-      <div class="stab" id="er-tab-quit" onclick="switchEditTab('quit',this)" style="flex:1;border-bottom-width:2px;font-size:10px">QUIT</div>
-      <div class="stab" id="er-tab-add" onclick="switchEditTab('add',this)" style="flex:1;border-bottom-width:2px;font-size:10px">ADD</div>
+      <div class="stab on" id="er-tab-rm" onclick="switchEditTab('rm')" style="flex:1;border-bottom-width:2px;font-size:11px">REMOVE</div>
+      <div class="stab" id="er-tab-add" onclick="switchEditTab('add')" style="flex:1;border-bottom-width:2px;font-size:11px">ADD</div>
+      <div class="stab" id="er-tab-del" onclick="switchEditTab('del')" style="flex:1;border-bottom-width:2px;font-size:11px;color:var(--red)">DELETE</div>
     </div>
 
-    <!-- WO panel -->
-    <div id="er-panel-wo">
-      <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);margin-bottom:10px">
-        Player yang salah daftar / tidak jadi main. Semua matchnya akan dihapus permanen.
-      </p>
-      <div id="er-wo-list"></div>
-    </div>
-
-    <!-- Quit panel -->
-    <div id="er-panel-quit" style="display:none">
-      <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);margin-bottom:10px">
-        Player berhenti di tengah rally. Match yang sudah dimain tetap dihitung (level + split bill). Match pending dihapus.
-      </p>
-      <div id="er-quit-list"></div>
-    </div>
-
-    <!-- Add panel -->
-    <div id="er-panel-add" style="display:none">
-      <!-- single: pick 1 player + group -->
-      <div id="er-add-single">
-        <div class="fgrp"><label>Player to Add</label>
-          <div class="psel-list" id="er-add-player-list"></div>
-          <button class="btn b-ghost b-sm b-full" style="margin-top:8px" onclick="openQuickAddEdit()">+ New Player</button>
+    <!-- REMOVE panel: WO or Quit -->
+    <div id="er-panel-rm">
+      <div class="fgrp">
+        <label>Mode</label>
+        <div class="toggle-row">
+          <div class="tgl on" data-rm="quit" onclick="setRmMode('quit')">QUIT</div>
+          <div class="tgl" data-rm="wo" onclick="setRmMode('wo')">WO</div>
         </div>
-        <div class="fgrp hidden" id="er-group-sel-wrap"><label>Add to Group</label>
-          <select id="er-group-sel" onchange="ER.addGroupId=this.value"></select>
-        </div>
+        <div class="hint" id="er-rm-hint">QUIT: Player berhenti di tengah rally. Match yang sudah done tetap dihitung. Match pending jadi CANCEL.</div>
       </div>
-      <!-- double: pick 2 players as new pair -->
-      <div id="er-add-double" style="display:none">
-        <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);margin-bottom:10px">
-          Select 2 players to form a new pair. They will play vs all existing pairs.
-        </p>
-        <div class="psel-list" id="er-add-pair-list"></div>
-        <button class="btn b-ghost b-sm b-full" style="margin-top:8px" onclick="openQuickAddEdit()">+ New Player</button>
-        <div id="er-pair-preview" style="margin-top:10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--acc)"></div>
+      <div id="er-rm-list"></div>
+      <div id="er-rm-restore" style="margin-top:12px"></div>
+    </div>
+
+    <!-- ADD panel -->
+    <div id="er-panel-add" style="display:none">
+      <div class="fgrp hidden" id="er-add-group-wrap">
+        <label>Add to Group</label>
+        <select id="er-add-group-sel" onchange="ER.addGroupId=this.value;renderERAdd();"></select>
+      </div>
+      <p id="er-add-hint" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);margin-bottom:10px"></p>
+      <div id="er-add-list"></div>
+      <button class="btn b-ghost b-sm b-full" style="margin-top:8px" onclick="openQuickAddEdit()">+ New Player</button>
+      <div id="er-add-preview" style="margin-top:10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--acc)"></div>
+    </div>
+
+    <!-- DELETE panel -->
+    <div id="er-panel-del" style="display:none">
+      <div class="card" style="border-color:var(--red)">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--red);letter-spacing:1.5px;margin-bottom:8px">Delete Rally?</div>
+        <div style="font-size:13px;color:var(--t2);line-height:1.5;margin-bottom:10px">
+          Rally <strong id="er-del-name">this rally</strong> beserta <strong id="er-del-mcount">0</strong> match akan <strong style="color:var(--red)">dihapus permanen</strong>. Tidak bisa di-undo.
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);margin-bottom:12px">
+          Level player yang sudah berubah karena rally ini <strong>tidak akan reverted</strong>.
+        </div>
+        <button class="btn b-danger b-full" onclick="confirmDeleteRally()">Hapus Rally</button>
       </div>
     </div>
   </div>
@@ -509,6 +510,38 @@ input[type=number]{-moz-appearance:textfield}
   <div class="sheet-foot">
     <button class="btn b-ghost" onclick="closeOv('quick-edit-player')">Cancel</button>
     <button class="btn b-acc" onclick="saveQuickEditPlayer()">Add</button>
+  </div>
+</div></div>
+
+
+<!-- No Rally modal -->
+<div class="overlay hidden" id="ov-no-rally"><div class="sheet">
+  <div class="sheet-hdr">
+    <div class="sheet-title">Tanpa Rally (Latihan)</div>
+    <button class="close-x" onclick="closeOv('no-rally')">&#x2715;</button>
+  </div>
+  <div class="sheet-body">
+    <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);margin-bottom:10px">Pilih player yang hadir latihan. Bill akan di-split rata.</p>
+    <div id="nr-player-list" class="psel-list"></div>
+    <button class="btn b-ghost b-sm b-full" style="margin-top:8px" onclick="openQuickAddNR()">+ New Player</button>
+    <div id="nr-preview" style="margin-top:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--acc)"></div>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn b-ghost" onclick="closeOv('no-rally')">Cancel</button>
+    <button class="btn b-acc" id="btn-nr-confirm" onclick="confirmNoRally()">Save</button>
+  </div>
+</div></div>
+
+<!-- Delete Session confirm -->
+<div class="overlay hidden" id="ov-del-session"><div class="sheet center">
+  <div class="sheet-hdr"><div class="sheet-title" style="color:var(--red)">Delete Session?</div><button class="close-x" onclick="closeOv('del-session')">&#x2715;</button></div>
+  <div class="sheet-body">
+    <p style="font-size:14px;color:var(--t2);line-height:1.5">Session <strong id="del-sess-name"></strong> beserta semua rally, match, dan entry akan <strong style="color:var(--red)">dihapus permanen</strong>.</p>
+    <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);margin-top:10px">Tidak bisa di-undo.</p>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn b-ghost" onclick="closeOv('del-session')">Cancel</button>
+    <button class="btn b-danger" onclick="doDeleteSession()">Hapus Session</button>
   </div>
 </div></div>
 
@@ -800,10 +833,10 @@ var DB = (function() {
 // -- LEVEL HELPER ---------------------------------------------
 function levelLabel(n) {
   var v = Math.min(100, Math.max(0, Number(n) || 50));
-  if (v >= 81) return 'A';
-  if (v >= 61) return 'B';
-  if (v >= 41) return 'C';
-  if (v >= 21) return 'D';
+  if (v >= 85) return 'A';
+  if (v >= 69) return 'B';
+  if (v >= 50) return 'C';
+  if (v >= 25) return 'D';
   return 'E';
 }
 function clampLevel(n) { return Math.min(100, Math.max(0, Math.round(Number(n) || 50))); }
@@ -952,15 +985,62 @@ function renderSessionList(){
   var html='';
   sessions.forEach(function(s){
     var isAct=s.status==='active';
-    html+='<div class="sess-card'+(isAct?' act':'')+'" onclick="navigate(\'session\',{sid:\''+s.id+'\'})">';
+    // Can delete only if no bill exists and no matches
+    var hasBill=!!(C.bills&&C.bills[s.id]);
+    var hasMatches=C.matches.filter(function(m){return m.session_id===s.id;}).length>0;
+    var canDelete=!hasBill&&!hasMatches;
+    html+='<div class="sess-card'+(isAct?' act':'')+'" style="position:relative">';
+    html+='<div onclick="navigate(\'session\',{sid:\''+s.id+'\'})">';
     html+='<div class="row-bet"><div class="sess-name">'+esc(s.name)+'</div><span class="badge '+(isAct?'ba':'bc')+'">'+(isAct?'ACTIVE':'CLOSED')+'</span></div>';
     html+='<div class="sess-meta">'+fmtDate(s.date)+(s.venue?' \u00b7 '+esc(s.venue):'')+'</div>';
+    html+='</div>';
+    if(canDelete){
+      html+='<button class="btn b-ghost b-xs" onclick="event.stopPropagation();openDeleteSessionConfirm(\''+s.id+'\')" style="position:absolute;top:8px;right:8px;padding:4px 8px;color:var(--red);border-color:var(--red-dim);font-size:10px">Delete</button>';
+    }
     html+='</div>';
   });
   document.getElementById('sessions-list').innerHTML=html;
 }
 
-function openAddSession(){document.getElementById('inp-sdate').valueAsDate=new Date();document.getElementById('inp-sname').value='';document.getElementById('inp-svenue').value='';openOv('add-session');}
+async function deleteSession(sid,ev){
+  if(ev){ev.stopPropagation();ev.preventDefault();}
+  var s=C.sessions.find(function(x){return x.id===sid;});
+  if(!s){toast('Session not found','err');return;}
+  if(!confirm('Hapus session "'+s.name+'"? Tidak bisa di-undo.'))return;
+  try{
+    // Delete cascade (should already have no matches/bills if we allow delete, but be safe)
+    await fetch(SUPA_URL+'/rest/v1/donation_entries?session_id=eq.'+sid,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    await fetch(SUPA_URL+'/rest/v1/bill_entries?session_id=eq.'+sid,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    await fetch(SUPA_URL+'/rest/v1/groups?session_id=eq.'+sid,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    await fetch(SUPA_URL+'/rest/v1/rallies?session_id=eq.'+sid,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    await fetch(SUPA_URL+'/rest/v1/sessions?id=eq.'+sid,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}});
+    C.sessions=C.sessions.filter(function(x){return x.id!==sid;});
+    C.rallies=C.rallies.filter(function(x){return x.session_id!==sid;});
+    C.groups=C.groups.filter(function(x){return x.session_id!==sid;});
+    toast('Session deleted','ok');
+    renderSessionList();
+  }catch(err){toast(err.message,'err');}
+}
+
+function openAddSession(){
+  var d=new Date();
+  document.getElementById('inp-sdate').valueAsDate=d;
+  document.getElementById('inp-sname').value=autoSessionName(d);
+  document.getElementById('inp-svenue').value='';
+  openOv('add-session');
+}
+function autoSessionName(d){
+  var days=['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'];
+  var months=['JANUARI','FEBRUARI','MARET','APRIL','MEI','JUNI','JULI','AGUSTUS','SEPTEMBER','OKTOBER','NOVEMBER','DESEMBER'];
+  return days[d.getDay()]+' - '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+}
+function onSessDateChange(){
+  // Re-fill session name when user changes date (always auto-update)
+  var dv=document.getElementById('inp-sdate').value;
+  if(!dv)return;
+  var d=new Date(dv+'T00:00:00');
+  document.getElementById('inp-sname').value=autoSessionName(d);
+}
 async function createSession(){
   var name=document.getElementById('inp-sname').value.trim();
   if(!name){toast('Session name required','err');return;}
@@ -999,16 +1079,52 @@ function renderMatchTab(){
   if(!sess){el.innerHTML='<div class="empty">No session.</div>';return;}
   var rallies=C.rallies.filter(function(r){return r.session_id===sess.id;});
   var isActive=sess.status==='active';
+  var noRallyPids=parseIds(sess.no_rally_pids);
+  var isNoRally=noRallyPids.length>0 && rallies.length===0;
   var html='<div class="sess-hero"><div class="sess-hero-name">'+esc(sess.name)+'</div>';
   html+='<div class="sess-hero-meta"><span class="badge '+(isActive?'ba':'bc')+'">'+(isActive?'ACTIVE':'CLOSED')+'</span>';
   html+='<span class="meta-chip">'+fmtDate(sess.date)+'</span>';
   if(sess.venue)html+='<span class="meta-chip">&#x1F4CD; '+esc(sess.venue)+'</span>';
+  if(isNoRally)html+='<span class="badge bpend">NO RALLY</span>';
   html+='</div>';
-  if(isActive)html+='<div style="margin-top:10px"><button class="btn b-acc b-sm" onclick="openGenRally()">+ Generate Rally</button></div>';
-  else html+='<div style="margin-top:8px;font-family:DM Mono,monospace;font-size:11px;color:var(--t3)">&#x1F512; Session closed</div>';
+  if(isActive){
+    html+='<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">';
+    html+='<button class="btn b-acc b-sm" onclick="openGenRally()">+ Generate Rally</button>';
+    // No Rally button: only if no rallies yet
+    if(!rallies.length){
+      html+='<button class="btn b-ghost b-sm" onclick="openNoRally()">'+(isNoRally?'&#x270E; Edit Tanpa Rally':'+ Tanpa Rally')+'</button>';
+    }
+    html+='</div>';
+  } else html+='<div style="margin-top:8px;font-family:DM Mono,monospace;font-size:11px;color:var(--t3)">&#x1F512; Session closed</div>';
   html+='</div>';
+
+  // Hint: if no rally AND no no-rally, show explanation
+  if(isActive && !rallies.length && !isNoRally){
+    html+='<div class="card" style="margin-bottom:14px;border-left:3px solid var(--acc)"><div style="font-family:DM Mono,monospace;font-size:10px;letter-spacing:1px;color:var(--acc);margin-bottom:6px">PILIH MODE</div>';
+    html+='<div style="font-size:13px;color:var(--t2);line-height:1.5">';
+    html+='<strong style="color:var(--t1)">Generate Rally</strong> -- Main dengan rally (single/double), level-based, standing, H2H<br/><br/>';
+    html+='<strong style="color:var(--t1)">Tanpa Rally</strong> -- Sesi latihan bebas. Pilih player yang hadir, bill split rata di antara mereka. Level tidak terpengaruh.';
+    html+='</div></div>';
+  }
+
+  // No-rally view: show player list + count
+  if(isNoRally){
+    html+='<div class="sec-title">PLAYER HADIR ('+noRallyPids.length+')</div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">';
+    noRallyPids.forEach(function(pid){
+      var p=pobj(pid);
+      var lv=p.level_label||levelLabel(p.level);
+      html+='<div class="pair-row" style="padding:6px 10px">';
+      html+='<span class="badge blv'+lv+'" style="padding:1px 5px;margin-right:6px">'+lv+'</span>';
+      html+='<span style="font-size:12px">'+esc(p.name)+'</span></div>';
+    });
+    html+='</div>';
+    html+='<div class="card" style="background:var(--bg-raised);border-color:var(--border)"><div style="font-family:DM Mono,monospace;font-size:10px;color:var(--t3);margin-bottom:4px">LATIHAN BEBAS</div>';
+    html+='<div style="font-size:13px;color:var(--t2)">Bill akan di-split rata di antara '+noRallyPids.length+' player. Level tidak terpengaruh.</div></div>';
+  }
+
   if(!rallies.length){
-    html+='<div class="empty">No rallies yet.'+(isActive?'<br>Generate the first rally!':'')+'</div>';
+    if(!isNoRally)html+='<div class="empty">'+(isActive?'':'No rallies.')+'</div>';
   } else {
     // Search bar
     html+='<div class="search-bar">';
@@ -1209,17 +1325,38 @@ async function doCloseRally(){
 }
 
 async function applyLevelUpdate(rid){
+  // New leveling:
+  // SINGLE - based on level diff between winner and loser
+  //   diff >= +20 (winner much stronger)  -> winner 0,  loser -2
+  //   diff <= -20 (winner much weaker)    -> winner +2, loser  0
+  //   |diff| < 20 (close match)           -> winner +1, loser -1
+  // DOUBLE - flat: winner +1, loser -1
+  // Cancel/void: no effect. No Rally Win bonus anymore.
+  var rally=C.rallies.find(function(r){return r.id===rid;});
+  if(!rally)return;
   var done=C.matches.filter(function(m){return m.rally_id===rid&&m.status==='done';});
   if(!done.length)return;
+  var isDouble=rally.type==='double';
   var deltas={};
   done.forEach(function(m){
     var ws=m.result==='team_a'?parseIds(m.team_a):parseIds(m.team_b);
     var ls=m.result==='team_a'?parseIds(m.team_b):parseIds(m.team_a);
-    ws.forEach(function(id){deltas[id]=(deltas[id]||0)+2;});
-    ls.forEach(function(id){deltas[id]=(deltas[id]||0)-2;});
+    if(isDouble){
+      ws.forEach(function(id){deltas[id]=(deltas[id]||0)+1;});
+      ls.forEach(function(id){deltas[id]=(deltas[id]||0)-1;});
+    } else {
+      // Single: compute diff
+      var wLv=Number(pobj(ws[0]).level)||50;
+      var lLv=Number(pobj(ls[0]).level)||50;
+      var diff=wLv-lLv;
+      var wDelta,lDelta;
+      if(diff>=20){wDelta=0;lDelta=-2;}
+      else if(diff<=-20){wDelta=2;lDelta=0;}
+      else{wDelta=1;lDelta=-1;}
+      ws.forEach(function(id){deltas[id]=(deltas[id]||0)+wDelta;});
+      ls.forEach(function(id){deltas[id]=(deltas[id]||0)+lDelta;});
+    }
   });
-  var winners=getRallyWinners(rid);
-  winners.forEach(function(w){deltas[w.id]=(deltas[w.id]||0)+2;});
   await Promise.all(Object.keys(deltas).map(function(pid){
     var p=pobj(pid);
     var newLevel=clampLevel(Number(p.level)+deltas[pid]);
@@ -1302,19 +1439,145 @@ function doGenStep1(){
   var players=cfg.pids.map(pobj).sort(function(a,b){return Number(b.level)-Number(a.level);});
 
   if(cfg.type==='single'){
-    // Generate all matches preview
-    var matches=cfg.gcount>1?genSingleGrouped(players,cfg.gcount):rrSingle(players.map(function(p){return p.id;}));
-    var html=previewMatchesHtml(matches,cfg.gcount>1?snakeDraft(players,cfg.gcount):[]);
-    document.getElementById('gen-s2-content').innerHTML=html;
+    if(cfg.gcount>1){
+      // Split by level gap
+      S.genGroups=splitByLevelGap(players,cfg.gcount);
+      renderGroupEditor();
+    } else {
+      // No groups — show match preview directly
+      S.genGroups=null;
+      var matches=rrSingle(players.map(function(p){return p.id;}));
+      var html=previewMatchesHtml(matches,[]);
+      document.getElementById('gen-s2-content').innerHTML=html;
+    }
     showGenStep(2);
   } else {
-    // Generate pairs (mix-rata, avoid last session pairs)
+    // Double: generate pairs
     S.genPairs=genMixPairs(players);
-    renderPairEditor();
+    if(cfg.gcount>1){
+      // Random split pairs into groups
+      S.genPairGroups=splitPairsRandom(S.genPairs,cfg.gcount);
+      renderPairGroupEditor();
+    } else {
+      S.genPairGroups=null;
+      renderPairEditor();
+    }
     showGenStep(2);
   }
   updateGenFoot();
 }
+
+// Split players into N groups based on LEVEL GAP (find largest gaps to break)
+function splitByLevelGap(sortedPlayers, n) {
+  // sortedPlayers already sorted by level desc
+  if (n <= 1 || sortedPlayers.length < n) return [sortedPlayers];
+  // Compute gaps between consecutive players
+  var gaps = [];
+  for (var i=0; i<sortedPlayers.length-1; i++) {
+    var diff = Number(sortedPlayers[i].level) - Number(sortedPlayers[i+1].level);
+    gaps.push({idx: i+1, diff: diff});
+  }
+  // Sort by diff desc, take top (n-1) gaps as split points
+  gaps.sort(function(a,b){return b.diff - a.diff;});
+  var splitPoints = gaps.slice(0, n-1).map(function(g){return g.idx;}).sort(function(a,b){return a-b;});
+  var groups = [];
+  var prev = 0;
+  splitPoints.forEach(function(sp){
+    groups.push(sortedPlayers.slice(prev, sp));
+    prev = sp;
+  });
+  groups.push(sortedPlayers.slice(prev));
+  return groups;
+}
+
+// Random split of pairs into groups
+function splitPairsRandom(pairs, n) {
+  var shuffled = pairs.slice();
+  for (var i=shuffled.length-1; i>0; i--) {
+    var j = Math.floor(Math.random()*(i+1));
+    var t = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = t;
+  }
+  var groups = [];
+  for (var k=0; k<n; k++) groups.push([]);
+  shuffled.forEach(function(p, idx){ groups[idx % n].push(p); });
+  return groups;
+}
+
+// Editor: show groups, allow regenerate & manual move
+function renderGroupEditor() {
+  var html = '<div style="font-family:DM Mono,monospace;font-size:11px;color:var(--t2);margin-bottom:10px">Group dibagi berdasarkan level gap. Klik player untuk pindah group.</div>';
+  html += '<button class="btn b-ghost b-sm" style="margin-bottom:10px" onclick="regenerateGroups()">&#x1F500; Regenerate</button>';
+  S.genGroups.forEach(function(g, gi){
+    html += '<div style="font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:1px;color:var(--acc);margin-bottom:6px">Group '+'ABCDE'[gi]+' ('+g.length+')</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">';
+    g.forEach(function(p){
+      var lv = p.level_label || levelLabel(p.level);
+      html += '<div class="pair-row" style="padding:6px 10px;cursor:pointer" onclick="movePlayerGroup(\''+p.id+'\')">';
+      html += '<span class="badge blv'+lv+'" style="padding:1px 5px;margin-right:6px">'+lv+'</span>';
+      html += '<span style="font-size:12px">'+esc(p.name)+'</span>';
+      html += '<span style="color:var(--t3);font-size:10px;margin-left:6px">'+p.level+'</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  html += '<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--t3);margin-top:10px">Total matches: '+computeGroupMatches()+'</div>';
+  document.getElementById('gen-s2-content').innerHTML = html;
+}
+
+function computeGroupMatches() {
+  if (!S.genGroups) return 0;
+  return S.genGroups.reduce(function(sum, g){
+    return sum + g.length*(g.length-1)/2;
+  }, 0);
+}
+
+function regenerateGroups() {
+  var cfg = S.genConfig;
+  var players = cfg.pids.map(pobj).sort(function(a,b){return Number(b.level)-Number(a.level);});
+  S.genGroups = splitByLevelGap(players, cfg.gcount);
+  renderGroupEditor();
+}
+
+function movePlayerGroup(pid) {
+  // Rotate player to next group
+  var currentGroup = -1, currentIdx = -1;
+  S.genGroups.forEach(function(g, gi){
+    var idx = g.findIndex(function(p){return p.id===pid;});
+    if (idx > -1) { currentGroup = gi; currentIdx = idx; }
+  });
+  if (currentGroup < 0) return;
+  var nextGroup = (currentGroup + 1) % S.genGroups.length;
+  var p = S.genGroups[currentGroup].splice(currentIdx, 1)[0];
+  S.genGroups[nextGroup].push(p);
+  // Keep each group sorted by level desc
+  S.genGroups[nextGroup].sort(function(a,b){return Number(b.level)-Number(a.level);});
+  renderGroupEditor();
+}
+
+// Pair group editor (double)
+function renderPairGroupEditor() {
+  var html = '<div style="font-family:DM Mono,monospace;font-size:11px;color:var(--t2);margin-bottom:10px">Pasangan random dibagi ke group. Swap player dulu sebelum regenerate jika perlu.</div>';
+  html += '<div style="display:flex;gap:6px;margin-bottom:10px">';
+  html += '<button class="btn b-ghost b-sm" onclick="regeneratePairGroups()">&#x1F500; Regenerate Groups</button>';
+  html += '<button class="btn b-ghost b-sm" onclick="showGenStep(2);renderPairEditor()">Edit Pairs</button>';
+  html += '</div>';
+  S.genPairGroups.forEach(function(grp, gi){
+    html += '<div style="font-family:Bebas Neue,sans-serif;font-size:14px;letter-spacing:1px;color:var(--acc);margin:8px 0 4px">Group '+'ABCDE'[gi]+' ('+grp.length+' pair)</div>';
+    grp.forEach(function(pair){
+      html += '<div class="pair-row" style="margin-bottom:4px">';
+      html += '<div class="pair-name" style="font-size:12px">'+esc(pname(pair.a))+' &amp; '+esc(pname(pair.b))+'</div>';
+      html += '</div>';
+    });
+  });
+  document.getElementById('gen-s2-content').innerHTML = html;
+}
+
+function regeneratePairGroups() {
+  S.genPairGroups = splitPairsRandom(S.genPairs, S.genConfig.gcount);
+  renderPairGroupEditor();
+}
+
+
 
 function doGenStep2Double(){
   // Generate matches from current pairs
@@ -1471,8 +1734,9 @@ async function confirmGenerate(){
   var useGroups=cfg.gcount>1;
 
   if(cfg.type==='single'){
-    if(useGroups){
-      snakeDraft(players,cfg.gcount).forEach(function(g,i){
+    if(useGroups && S.genGroups){
+      // Use user-edited groups
+      S.genGroups.forEach(function(g,i){
         allGroups.push({tempId:i,name:'Group '+'ABCDE'[i],pids:g.map(function(p){return p.id;})});
         rrSingle(g.map(function(p){return p.id;})).forEach(function(m){m.gid=i;allMatches.push(m);});
       });
@@ -1480,7 +1744,23 @@ async function confirmGenerate(){
       allMatches=rrSingle(players.map(function(p){return p.id;}));
     }
   } else {
-    allMatches=S._genMatches||rrDouble(S.genPairs);
+    // Double
+    if(useGroups && S.genPairGroups){
+      // Group-based double
+      S.genPairGroups.forEach(function(grp,i){
+        var pids = [];
+        grp.forEach(function(pr){pids.push(pr.a, pr.b);});
+        allGroups.push({tempId:i, name:'Group '+'ABCDE'[i], pids:pids});
+        // Generate round-robin matches within group
+        for (var a=0; a<grp.length; a++) {
+          for (var b=a+1; b<grp.length; b++) {
+            allMatches.push({teamA:[grp[a].a,grp[a].b], teamB:[grp[b].a,grp[b].b], gid:i});
+          }
+        }
+      });
+    } else {
+      allMatches=S._genMatches||rrDouble(S.genPairs);
+    }
   }
 
   try{
@@ -1511,8 +1791,17 @@ async function confirmGenerate(){
 
     C.rallies.push(rally);
     closeOv('gen-rally');
+    // Clear no-rally mode if active
+    var sess = C.sessions.find(function(s){return s.id===sid;});
+    if (sess && sess.no_rally_pids) {
+      await fetch(SUPA_URL+'/rest/v1/sessions?id=eq.'+sid, {
+        method:'PATCH', headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+        body: JSON.stringify({no_rally_pids: null})
+      });
+      sess.no_rally_pids = null;
+    }
     toast('Rally generated!','ok');
-    renderMatchTab();renderStandingTab();
+    renderMatchTab();renderStandingTab();renderPaymentTab();
   }catch(err){toast(err.message,'err');}
   finally{setBtn('btn-confirm-gen',false);}
 }
@@ -1539,7 +1828,15 @@ function renderStandingTab(){
   var sess=C.sessions.find(function(s){return s.id===S.activeSid;});
   if(!sess){el.innerHTML='<div class="empty">No session.</div>';return;}
   var rallies=C.rallies.filter(function(r){return r.session_id===sess.id;}).sort(function(a,b){var aC=a.status==='closed'?1:0,bC=b.status==='closed'?1:0;if(aC!==bC)return aC-bC;return new Date(a.created_at)-new Date(b.created_at);});
-  if(!rallies.length){el.innerHTML='<div class="empty">No rallies yet.</div>';return;}
+  var noRallyPids=parseIds(sess.no_rally_pids);
+  if(!rallies.length){
+    if(noRallyPids.length>0){
+      el.innerHTML='<div class="empty" style="padding:30px 20px"><div style="font-family:Bebas Neue,sans-serif;font-size:22px;letter-spacing:1.5px;color:var(--acc);margin-bottom:8px">NO RALLY MODE</div><div style="font-size:13px;color:var(--t2)">Sesi latihan bebas. Tidak ada standing.<br/>Cek tab <strong>PAYMENT</strong> untuk split bill.</div></div>';
+    } else {
+      el.innerHTML='<div class="empty">No rallies yet.</div>';
+    }
+    return;
+  }
 
   var html='';
   var allMs=C.matches.filter(function(m){return m.session_id===sess.id&&m.status==='done';});
@@ -1933,20 +2230,29 @@ function renderPaymentTab(){
 
   } else {
     // CLOSED BILL MODE -- show split & payment status
+    var sess2=C.sessions.find(function(s){return s.id===sid;});
+    var noRallyPids2=sess2?parseIds(sess2.no_rally_pids):[];
     var sessionPlayers=getSessionPlayers(sid);
-    // Calculate per-player split based on DONE match participation
-    // (void and pending don't count; quit players counted for matches they played)
-    var playerMatches={}; // pid -> count of done matches played
-    var totalMatchSlots=0;
-    C.matches.filter(function(m){return m.session_id===sid&&m.status==='done';}).forEach(function(m){
-      var all=parseIds(m.team_a).concat(parseIds(m.team_b));
-      all.forEach(function(pid){
-        playerMatches[pid]=(playerMatches[pid]||0)+1;
+    var playerMatches={}; var totalMatchSlots=0;
+
+    if(noRallyPids2.length>0){
+      // No-rally mode: split rata ke player yang terdaftar
+      noRallyPids2.forEach(function(pid){
+        playerMatches[pid]=1;
         totalMatchSlots++;
       });
-    });
+    } else {
+      // Rally mode: hitung dari match done
+      C.matches.filter(function(m){return m.session_id===sid&&m.status==='done';}).forEach(function(m){
+        var all=parseIds(m.team_a).concat(parseIds(m.team_b));
+        all.forEach(function(pid){
+          playerMatches[pid]=(playerMatches[pid]||0)+1;
+          totalMatchSlots++;
+        });
+      });
+    }
     var ratePerSlot=totalMatchSlots>0?net/totalMatchSlots:0;
-    var playerSlots=playerMatches; // alias for compatibility
+    var playerSlots=playerMatches;
 
     html+='<div class="pay-summary">';
     html+='<div class="pay-row"><span class="pay-lbl">COLLECTOR</span><span class="pay-val" style="font-size:12px">'+esc(bill.bank_account)+'</span></div>';
@@ -1954,7 +2260,7 @@ function renderPaymentTab(){
     html+='<div class="pay-row"><span class="pay-lbl">TOTAL BILL</span><span class="pay-val">'+rp(bill.total_bill)+'</span></div>';
     html+='<div class="pay-row"><span class="pay-lbl">DONASI</span><span class="pay-val" style="color:var(--amber)">- '+rp(bill.total_donasi)+'</span></div>';
     html+='<div class="pay-row"><span class="pay-lbl">NETT</span><span class="pay-val big">'+rp(net)+'</span></div>';
-    html+='<div class="pay-row"><span class="pay-lbl">RATE/MATCH</span><span class="pay-val">'+rp(Math.round(ratePerSlot))+'</span></div>';
+    html+='<div class="pay-row"><span class="pay-lbl">'+(noRallyPids2.length>0?"RATE/PLAYER":"RATE/MATCH")+'</span><span class="pay-val">'+rp(Math.round(ratePerSlot))+'</span></div>';
     var paidCount=payments.length;
     var totalPaid=payments.reduce(function(s,p){return s+Number(p.amount);},0);
     html+='<div class="sep" style="margin:8px 0"></div>';
@@ -1973,7 +2279,7 @@ function renderPaymentTab(){
       var isPaid=!!paid;
       html+='<div class="split-card '+(isPaid?'paid':'unpaid')+'">';
       html+='<div><div style="font-size:14px;font-weight:500">'+esc(pname(pid))+'</div>';
-      html+='<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--t3);margin-top:1px">'+slots+' match &times; '+rp(Math.round(ratePerSlot))+' = <strong>'+rp(amount)+'</strong></div>';
+      html+='<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--t3);margin-top:1px">'+(noRallyPids2.length>0?'split rata':slots+' match &times; '+rp(Math.round(ratePerSlot)))+' = <strong>'+rp(amount)+'</strong></div>';
       if(isPaid)html+='<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--green);margin-top:2px">via '+paid.method+'</div>';
       html+='</div>';
       html+='<div style="text-align:right">';
@@ -2044,21 +2350,53 @@ async function deleteDonation(id){
 
 function openCloseBill(){
   var sid=S.activeSid;
+  // Check for active rallies
+  var activeRallies=C.rallies.filter(function(r){return r.session_id===sid&&r.status!=='closed';});
+  if(activeRallies.length>0){
+    var names=activeRallies.map(function(r){return r.name;}).join(', ');
+    if(!confirm('Masih ada rally aktif: '+names+'.\n\nSemua rally akan di-close dulu sebelum bill. Lanjut?'))return;
+    // Close all active rallies
+    Promise.all(activeRallies.map(function(r){
+      return DB.closeRally(r.id).then(function(){
+        r.status='closed';
+        // Void pending matches
+        C.matches.forEach(function(m){if(m.rally_id===r.id&&m.status==='pending'){m.status='void';m.result='void';}});
+        return applyLevelUpdate(r.id);
+      });
+    })).then(function(){
+      return DB.getPlayers();
+    }).then(function(players){
+      C.players=players||[];
+      toast('Active rallies closed','ok');
+      _openCloseBillInner();
+      renderMatchTab();renderStandingTab();
+    }).catch(function(err){toast(err.message,'err');});
+    return;
+  }
+  _openCloseBillInner();
+}
+function _openCloseBillInner(){
+  var sid=S.activeSid;
   var entries=C.billEntries[sid]||[];
   var donations=C.donationEntries[sid]||[];
   var totalBill=entries.reduce(function(s,e){return s+Number(e.total);},0);
   var totalDonasi=donations.reduce(function(s,d){return s+Number(d.total);},0);
   var net=totalBill-totalDonasi;
 
-  // Split by done match count
-  var playerSlots={};
-  var totalSlots=0;
-  C.matches.filter(function(m){return m.session_id===sid&&m.status==='done';}).forEach(function(m){
-    parseIds(m.team_a).concat(parseIds(m.team_b)).forEach(function(pid){
-      playerSlots[pid]=(playerSlots[pid]||0)+1;
-      totalSlots++;
+  // Split calculation - handle no-rally mode
+  var sess3=C.sessions.find(function(s){return s.id===sid;});
+  var noRallyPids3=sess3?parseIds(sess3.no_rally_pids):[];
+  var playerSlots={}; var totalSlots=0;
+  if(noRallyPids3.length>0){
+    noRallyPids3.forEach(function(pid){playerSlots[pid]=1;totalSlots++;});
+  } else {
+    C.matches.filter(function(m){return m.session_id===sid&&m.status==='done';}).forEach(function(m){
+      parseIds(m.team_a).concat(parseIds(m.team_b)).forEach(function(pid){
+        playerSlots[pid]=(playerSlots[pid]||0)+1;
+        totalSlots++;
+      });
     });
-  });
+  }
   var ratePerSlot=totalSlots>0?net/totalSlots:0;
 
   document.getElementById('inp-close-bank').value='';
@@ -2287,402 +2625,571 @@ async function savePlayer(){
 // ============================================
 var ER = {
   rallyId: null,
-  tab: 'wo',           // 'wo' | 'add'
-  selectedWO: null,    // for single: pid; for double: {a,b}
-  addPids: [],         // for add: selected player ids (max 1 single, 2 double)
+  tab: 'rm',                // 'rm' | 'add' | 'del'
+  rmMode: 'quit',           // 'quit' | 'wo'
+  rmSelected: {},           // {pid:true} or {pairKey:true}
+  addPids: [],              // selected pids (multi)
   addGroupId: null,
+  removedWOs: [],           // list of pids that were WO'd (for restore)
 };
 
 function openEditRally(rid) {
   ER.rallyId = rid;
-  ER.tab = 'wo';
-  ER.selectedWO = null;
+  ER.tab = 'rm';
+  ER.rmMode = 'quit';
+  ER.rmSelected = {};
   ER.addPids = [];
   ER.addGroupId = null;
 
   var rally = C.rallies.find(function(r){return r.id===rid;});
+  if (!rally) { toast('Rally not found','err'); return; }
   document.getElementById('edit-rally-title').textContent = 'Edit ' + rally.name;
   document.getElementById('edit-rally-sub').textContent = rally.type === 'double' ? '2v2 Double' : '1v1 Single';
 
-  switchEditTab('wo', document.getElementById('er-tab-wo'));
+  switchEditTab('rm');
   openOv('edit-rally');
 }
 
-function switchEditTab(tab, btn) {
+function switchEditTab(tab) {
   ER.tab = tab;
-  ER.selectedWO = null;
-  document.getElementById('er-tab-wo').classList.toggle('on', tab==='wo');
-  document.getElementById('er-tab-quit').classList.toggle('on', tab==='quit');
+  ER.rmSelected = {};
+  ER.addPids = [];
+  document.getElementById('er-tab-rm').classList.toggle('on', tab==='rm');
   document.getElementById('er-tab-add').classList.toggle('on', tab==='add');
-  document.getElementById('er-panel-wo').style.display = tab==='wo' ? '' : 'none';
-  document.getElementById('er-panel-quit').style.display = tab==='quit' ? '' : 'none';
+  document.getElementById('er-tab-del').classList.toggle('on', tab==='del');
+  document.getElementById('er-panel-rm').style.display = tab==='rm' ? '' : 'none';
   document.getElementById('er-panel-add').style.display = tab==='add' ? '' : 'none';
-  if (tab === 'wo')   renderERWO();
-  if (tab === 'quit') renderERQuit();
-  if (tab === 'add')  renderERAdd();
+  document.getElementById('er-panel-del').style.display = tab==='del' ? '' : 'none';
+  document.getElementById('btn-er-confirm').style.display = tab==='del' ? 'none' : '';
+  if (tab === 'rm')  renderERRemove();
+  if (tab === 'add') renderERAdd();
+  if (tab === 'del') renderERDelete();
 }
 
-// -- WO panel -------------------------------------------------
-function renderERWO() {
+// ============================================================
+// REMOVE panel (WO / Quit combined, multi-select)
+// ============================================================
+function setRmMode(mode) {
+  ER.rmMode = mode;
+  document.querySelectorAll('[data-rm]').forEach(function(el){
+    el.classList.toggle('on', el.dataset.rm === mode);
+  });
+  var hint = mode === 'quit'
+    ? 'QUIT: Player berhenti di tengah rally. Match yang sudah done tetap dihitung. Match pending jadi CANCEL.'
+    : 'WO: Player salah daftar / tidak jadi main. Semua match dihapus permanen (bisa di-restore selama rally belum closed).';
+  document.getElementById('er-rm-hint').textContent = hint;
+  renderERRemove();
+}
+
+function renderERRemove() {
   var rally = C.rallies.find(function(r){return r.id===ER.rallyId;});
-  var el = document.getElementById('er-wo-list');
+  if (!rally) return;
+  var el = document.getElementById('er-rm-list');
+  var quitPids = parseIds(rally.quit_pids);
+  var woPids = parseIds(rally.wo_pids);
 
   if (rally.type === 'single') {
-    // Show each player in rally
-    var pids = parseIds(rally.player_ids);
-    var html = '';
-    pids.forEach(function(pid) {
-      var p = pobj(pid);
-      var lv = p.level_label || levelLabel(p.level);
-      var isSelected = ER.selectedWO === pid;
-      html += '<div class="psel-item' + (isSelected ? ' selected' : '') + '" onclick="selectWO(\'' + pid + '\')" style="cursor:pointer">';
-      html += '<div class="psel-left"><span class="badge blv' + lv + '">' + lv + '</span>';
-      html += '<div><div class="psel-name">' + esc(p.name) + '</div>';
-      var mCount = C.matches.filter(function(m){return m.rally_id===ER.rallyId&&(parseIds(m.team_a).indexOf(pid)>-1||parseIds(m.team_b).indexOf(pid)>-1);}).length;
-      html += '<div class="psel-sub">' + mCount + ' match(es) will be deleted</div></div></div>';
-      html += '<span style="font-size:18px;color:' + (isSelected?'var(--red)':'var(--t3)') + '">' + (isSelected?'&#x2716;':'&#x25CB;') + '</span>';
-      html += '</div>';
+    // Only show players currently active (not already quit or WO'd)
+    var pids = parseIds(rally.player_ids).filter(function(id){
+      return quitPids.indexOf(id)===-1 && woPids.indexOf(id)===-1;
     });
-    el.innerHTML = html;
-  } else {
-    // Double: show each pair
-    var pairs = rally.pairs || [];
-    if (!pairs.length) {
-      // derive pairs from matches
-      var seen = {};
-      C.matches.filter(function(m){return m.rally_id===ER.rallyId;}).forEach(function(m){
-        var a = parseIds(m.team_a), b = parseIds(m.team_b);
-        if (a.length===2) { var k=a.slice().sort().join(','); if(!seen[k])seen[k]={a:a[0],b:a[1]}; }
-        if (b.length===2) { var k=b.slice().sort().join(','); if(!seen[k])seen[k]={a:b[0],b:b[1]}; }
+    if (!pids.length) {
+      el.innerHTML = '<div class="empty" style="padding:16px">No active players to remove.</div>';
+    } else {
+      var html = '';
+      pids.forEach(function(pid) {
+        var p = pobj(pid);
+        var lv = p.level_label || levelLabel(p.level);
+        var sel = !!ER.rmSelected[pid];
+        var done = C.matches.filter(function(m){return m.rally_id===ER.rallyId&&m.status==='done'&&(parseIds(m.team_a).indexOf(pid)>-1||parseIds(m.team_b).indexOf(pid)>-1);}).length;
+        var pend = C.matches.filter(function(m){return m.rally_id===ER.rallyId&&m.status==='pending'&&(parseIds(m.team_a).indexOf(pid)>-1||parseIds(m.team_b).indexOf(pid)>-1);}).length;
+        html += '<div class="psel-item'+(sel?' selected':'')+'" onclick="toggleRmPid(\''+pid+'\')" style="cursor:pointer">';
+        html += '<div class="psel-left"><span class="badge blv'+lv+'">'+lv+'</span>';
+        html += '<div><div class="psel-name">'+esc(p.name)+'</div>';
+        html += '<div class="psel-sub">'+done+' done &middot; '+pend+' pending</div></div></div>';
+        html += '<input type="checkbox" '+(sel?'checked':'')+' style="width:18px;height:18px;pointer-events:none;accent-color:var(--acc)"/>';
+        html += '</div>';
       });
-      pairs = Object.values(seen);
+      el.innerHTML = html;
     }
-    var html = '';
-    pairs.forEach(function(pair, i) {
-      var key = pair.a + '|' + pair.b;
-      var isSelected = ER.selectedWO && (ER.selectedWO.a===pair.a&&ER.selectedWO.b===pair.b)||(ER.selectedWO&&ER.selectedWO.a===pair.b&&ER.selectedWO.b===pair.a);
-      html += '<div class="psel-item' + (isSelected ? ' selected' : '') + '" onclick="selectWOPair(\'' + pair.a + '\',\'' + pair.b + '\')" style="cursor:pointer">';
-      html += '<div class="psel-left"><div class="p-av av' + (pobj(pair.a).level_label||'C') + '" style="width:26px;height:26px;font-size:11px">' + pobj(pair.a).name.charAt(0) + '</div>';
-      html += '<div><div class="psel-name">' + esc(pname(pair.a)) + ' &amp; ' + esc(pname(pair.b)) + '</div>';
-      var mCount = C.matches.filter(function(m){
-        var tA=parseIds(m.team_a).sort().join(','), tB=parseIds(m.team_b).sort().join(',');
-        var pKey=[pair.a,pair.b].sort().join(',');
-        return m.rally_id===ER.rallyId && (tA===pKey||tB===pKey);
-      }).length;
-      html += '<div class="psel-sub">' + mCount + ' match(es) will be deleted</div></div></div>';
-      html += '<span style="font-size:18px;color:' + (isSelected?'var(--red)':'var(--t3)') + '">' + (isSelected?'&#x2716;':'&#x25CB;') + '</span>';
-      html += '</div>';
+  } else {
+    // Double: pair-based, skip pairs where any member is quit/wo
+    var pairs = getExistingPairs(rally).filter(function(pr){
+      return quitPids.indexOf(pr.a)===-1 && quitPids.indexOf(pr.b)===-1
+        && woPids.indexOf(pr.a)===-1 && woPids.indexOf(pr.b)===-1;
     });
-    el.innerHTML = html;
+    if (!pairs.length) {
+      el.innerHTML = '<div class="empty" style="padding:16px">No active pairs.</div>';
+    } else {
+      var html = '';
+      pairs.forEach(function(pair){
+        var key = [pair.a,pair.b].sort().join('|');
+        var sel = !!ER.rmSelected[key];
+        var pKey = [pair.a,pair.b].sort().join(',');
+        var done = C.matches.filter(function(m){
+          var tA=parseIds(m.team_a).sort().join(','), tB=parseIds(m.team_b).sort().join(',');
+          return m.rally_id===ER.rallyId&&m.status==='done'&&(tA===pKey||tB===pKey);
+        }).length;
+        var pend = C.matches.filter(function(m){
+          var tA=parseIds(m.team_a).sort().join(','), tB=parseIds(m.team_b).sort().join(',');
+          return m.rally_id===ER.rallyId&&m.status==='pending'&&(tA===pKey||tB===pKey);
+        }).length;
+        html += '<div class="psel-item'+(sel?' selected':'')+'" onclick="toggleRmPair(\''+pair.a+'\',\''+pair.b+'\')" style="cursor:pointer">';
+        html += '<div class="psel-left"><div class="psel-name">'+esc(pname(pair.a))+' &amp; '+esc(pname(pair.b))+'</div>';
+        html += '<div class="psel-sub">'+done+' done &middot; '+pend+' pending</div></div>';
+        html += '<input type="checkbox" '+(sel?'checked':'')+' style="width:18px;height:18px;pointer-events:none;accent-color:var(--acc)"/>';
+        html += '</div>';
+      });
+      el.innerHTML = html;
+    }
+  }
+
+  // Restore section (WO'd players/pairs)
+  var restoreEl = document.getElementById('er-rm-restore');
+  if (woPids.length) {
+    var rhtml = '<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--amber);letter-spacing:1px;margin-bottom:6px">WO-ED (tap untuk restore)</div>';
+    if (rally.type === 'single') {
+      woPids.forEach(function(pid){
+        var p = pobj(pid);
+        rhtml += '<div class="psel-item" onclick="restoreWO(\''+pid+'\')" style="cursor:pointer;opacity:.8">';
+        rhtml += '<div class="psel-left"><div class="psel-name">'+esc(p.name)+'</div>';
+        rhtml += '<div class="psel-sub" style="color:var(--amber)">Tap untuk undo WO</div></div>';
+        rhtml += '<span style="color:var(--amber);font-size:12px">&#x21BA;</span></div>';
+      });
+    } else {
+      // Reconstruct pairs from wo_pair_data if available
+      var woPairs = parseIds(rally.wo_pairs) || [];
+      woPairs.forEach(function(pr){
+        rhtml += '<div class="psel-item" onclick="restoreWOPair(\''+pr.a+'\',\''+pr.b+'\')" style="cursor:pointer;opacity:.8">';
+        rhtml += '<div class="psel-left"><div class="psel-name">'+esc(pname(pr.a))+' &amp; '+esc(pname(pr.b))+'</div>';
+        rhtml += '<div class="psel-sub" style="color:var(--amber)">Tap untuk undo WO</div></div>';
+        rhtml += '<span style="color:var(--amber);font-size:12px">&#x21BA;</span></div>';
+      });
+    }
+    restoreEl.innerHTML = rhtml;
+  } else {
+    restoreEl.innerHTML = '';
   }
 }
 
-function selectWO(pid) {
-  ER.selectedWO = ER.selectedWO === pid ? null : pid;
-  if (ER.tab === 'quit') renderERQuit(); else renderERWO();
-}
-function selectWOPair(a, b) {
-  var same = ER.selectedWO && ((ER.selectedWO.a===a&&ER.selectedWO.b===b)||(ER.selectedWO.a===b&&ER.selectedWO.b===a));
-  ER.selectedWO = same ? null : {a:a, b:b};
-  if (ER.tab === 'quit') renderERQuit(); else renderERWO();
+function toggleRmPid(pid) {
+  if (ER.rmSelected[pid]) delete ER.rmSelected[pid];
+  else ER.rmSelected[pid] = true;
+  renderERRemove();
 }
 
-// -- Add panel -------------------------------------------------
+function toggleRmPair(a, b) {
+  var key = [a,b].sort().join('|');
+  if (ER.rmSelected[key]) delete ER.rmSelected[key];
+  else ER.rmSelected[key] = {a:a, b:b};
+  renderERRemove();
+}
+
+async function restoreWO(pid) {
+  var rally = C.rallies.find(function(r){return r.id===ER.rallyId;});
+  if (!confirm('Restore ' + pname(pid) + '? Match akan di-regenerate.')) return;
+  setBtn('btn-er-confirm', true);
+  try {
+    var woPids = parseIds(rally.wo_pids).filter(function(id){return id!==pid;});
+    var newPids = parseIds(rally.player_ids).concat([pid]);
+    // Generate new matches vs current active players
+    var groups = C.groups.filter(function(g){return g.rally_id===ER.rallyId;});
+    var opponents;
+    if (groups.length) {
+      // Find group with smallest count, or first one
+      var grp = groups[0];
+      opponents = parseIds(grp.player_ids);
+      var newGPids = opponents.concat([pid]);
+      await DB.updateGroup(grp.id, {player_ids: newGPids});
+      grp.player_ids = newGPids;
+    } else {
+      opponents = parseIds(rally.player_ids);
+    }
+    opponents = opponents.filter(function(id){
+      return id!==pid && parseIds(rally.quit_pids).indexOf(id)===-1 && parseIds(rally.wo_pids).indexOf(id)===-1;
+    });
+    await Promise.all(opponents.map(function(oid){
+      return DB.createMatch({rallyId:ER.rallyId,sessionId:rally.session_id,groupId:groups.length?groups[0].id:null,teamA:[pid],teamB:[oid]}).then(function(m){
+        C.matches.push(m); C.scores[m.id]={sa:0,sb:0};
+      });
+    }));
+    await DB.updateRally(ER.rallyId, {player_ids: newPids, wo_pids: woPids});
+    rally.player_ids = newPids; rally.wo_pids = woPids;
+    toast(pname(pid)+' restored', 'ok');
+    renderERRemove();
+    renderMatchTab(); renderStandingTab();
+  } catch(err) { toast(err.message,'err'); }
+  finally { setBtn('btn-er-confirm', false); }
+}
+
+async function restoreWOPair(a, b) {
+  var rally = C.rallies.find(function(r){return r.id===ER.rallyId;});
+  if (!confirm('Restore '+pname(a)+' & '+pname(b)+'?')) return;
+  setBtn('btn-er-confirm', true);
+  try {
+    var woPairs = (parseIds(rally.wo_pairs) || []).filter(function(pr){
+      return !((pr.a===a&&pr.b===b)||(pr.a===b&&pr.b===a));
+    });
+    var woPids = parseIds(rally.wo_pids).filter(function(id){return id!==a&&id!==b;});
+    var newPairs = (rally.pairs||[]).concat([{a:a,b:b}]);
+    var newPids = parseIds(rally.player_ids).concat([a,b]);
+    // Generate matches vs existing active pairs
+    var existingPairs = getExistingPairs(rally);
+    await Promise.all(existingPairs.map(function(ep){
+      return DB.createMatch({rallyId:ER.rallyId,sessionId:rally.session_id,groupId:null,teamA:[a,b],teamB:[ep.a,ep.b]}).then(function(m){
+        C.matches.push(m); C.scores[m.id]={sa:0,sb:0};
+      });
+    }));
+    await DB.updateRally(ER.rallyId, {pairs: newPairs, player_ids: newPids, wo_pids: woPids, wo_pairs: woPairs});
+    rally.pairs = newPairs; rally.player_ids = newPids; rally.wo_pids = woPids; rally.wo_pairs = woPairs;
+    toast('Pair restored', 'ok');
+    renderERRemove();
+    renderMatchTab(); renderStandingTab();
+  } catch(err) { toast(err.message,'err'); }
+  finally { setBtn('btn-er-confirm', false); }
+}
+
+// ============================================================
+// ADD panel (multi-select, group-aware)
+// ============================================================
 function renderERAdd() {
   var rally = C.rallies.find(function(r){return r.id===ER.rallyId;});
-  var existingPids = parseIds(rally.player_ids);
+  if (!rally) return;
   var groups = C.groups.filter(function(g){return g.rally_id===ER.rallyId;});
 
+  // Group selector
+  var groupWrap = document.getElementById('er-add-group-wrap');
+  if (groups.length) {
+    groupWrap.classList.remove('hidden');
+    var sel = document.getElementById('er-add-group-sel');
+    sel.innerHTML = groups.map(function(g){return '<option value="'+g.id+'">'+esc(g.name)+'</option>';}).join('');
+    if (!ER.addGroupId) ER.addGroupId = groups[0].id;
+    sel.value = ER.addGroupId;
+  } else {
+    groupWrap.classList.add('hidden');
+    ER.addGroupId = null;
+  }
+
+  // Hint text
+  var hint = document.getElementById('er-add-hint');
   if (rally.type === 'single') {
-    document.getElementById('er-add-single').style.display = '';
-    document.getElementById('er-add-double').style.display = 'none';
+    hint.textContent = 'Pilih player untuk ditambah. Match akan di-generate vs '+(groups.length?'player di group ini':'semua player rally')+'.';
+  } else {
+    hint.textContent = 'Pilih player (harus genap). Sistem akan pasangkan mix-rata, lalu generate match vs semua pair.';
+  }
 
-    // Group selector
-    var wrap = document.getElementById('er-group-sel-wrap');
-    wrap.classList.toggle('hidden', !groups.length);
-    if (groups.length) {
-      document.getElementById('er-group-sel').innerHTML = groups.map(function(g){return '<option value="'+g.id+'">'+esc(g.name)+'</option>';}).join('');
-      ER.addGroupId = groups[0].id;
-    }
-
-    // Player list -- all from DB not in rally
-    var available = C.players.filter(function(p){return existingPids.indexOf(p.id)===-1;});
-    if (!available.length) {
-      document.getElementById('er-add-player-list').innerHTML = '<div class="empty" style="padding:12px">All players already in rally.</div>';
-      return;
-    }
+  // Player list — from DB players not in rally (and not wo'd/quit)
+  var existingPids = parseIds(rally.player_ids).concat(parseIds(rally.wo_pids));
+  var available = C.players.filter(function(p){return existingPids.indexOf(p.id)===-1;});
+  if (!available.length) {
+    document.getElementById('er-add-list').innerHTML = '<div class="empty" style="padding:12px">All players already in rally.</div>';
+  } else {
     var html = '';
     available.sort(function(a,b){return Number(b.level)-Number(a.level);}).forEach(function(p){
       var lv = p.level_label||levelLabel(p.level);
       var sel = ER.addPids.indexOf(p.id) > -1;
-      html += '<div class="psel-item' + (sel?' selected':'') + '" id="erp_'+p.id+'">';
+      html += '<div class="psel-item'+(sel?' selected':'')+'" onclick="toggleERAddPid(\''+p.id+'\')" style="cursor:pointer">';
       html += '<div class="psel-left"><span class="badge blv'+lv+'">'+lv+'</span>';
-      html += '<div><div class="psel-name">'+esc(p.name)+'</div><div class="psel-sub">'+lv+' &middot; '+p.level+'</div></div></div>';
-      html += '<button class="psel-btn '+(sel?'remove':'add')+'" onclick="toggleERPid(\''+p.id+'\')">'+(sel?'&#x2212;':'&#xff0b;')+'</button>';
+      html += '<div><div class="psel-name">'+esc(p.name)+'</div><div class="psel-sub">'+p.level+'</div></div></div>';
+      html += '<input type="checkbox" '+(sel?'checked':'')+' style="width:18px;height:18px;pointer-events:none;accent-color:var(--acc)"/>';
       html += '</div>';
     });
-    document.getElementById('er-add-player-list').innerHTML = html;
-
-  } else {
-    // Double
-    document.getElementById('er-add-single').style.display = 'none';
-    document.getElementById('er-add-double').style.display = '';
-    ER.addPids = []; // reset, need exactly 2
-
-    // All players (including those already in rally -- they can form new pair with someone else)
-    var html = '';
-    C.players.slice().sort(function(a,b){return Number(b.level)-Number(a.level);}).forEach(function(p){
-      var lv = p.level_label||levelLabel(p.level);
-      var sel = ER.addPids.indexOf(p.id) > -1;
-      html += '<div class="psel-item'+(sel?' selected':'')+'" id="erp_'+p.id+'">';
-      html += '<div class="psel-left"><span class="badge blv'+lv+'">'+lv+'</span>';
-      html += '<div><div class="psel-name">'+esc(p.name)+'</div><div class="psel-sub">'+lv+' &middot; '+p.level+'</div></div></div>';
-      html += '<button class="psel-btn '+(sel?'remove':'add')+'" onclick="toggleERPidDouble(\''+p.id+'\')">'+(sel?'&#x2212;':'&#xff0b;')+'</button>';
-      html += '</div>';
-    });
-    document.getElementById('er-add-pair-list').innerHTML = html;
-    updateERPairPreview();
+    document.getElementById('er-add-list').innerHTML = html;
   }
+
+  updateERAddPreview();
 }
 
-function toggleERPid(pid) {
+function toggleERAddPid(pid) {
   var idx = ER.addPids.indexOf(pid);
   if (idx > -1) ER.addPids.splice(idx, 1);
-  else { ER.addPids = [pid]; } // single: only 1
+  else ER.addPids.push(pid);
   renderERAdd();
 }
 
-function toggleERPidDouble(pid) {
-  var idx = ER.addPids.indexOf(pid);
-  if (idx > -1) { ER.addPids.splice(idx,1); }
-  else if (ER.addPids.length < 2) { ER.addPids.push(pid); }
-  else { toast('Select exactly 2 players for a pair','warn'); return; }
-  var item = document.getElementById('erp_'+pid);
-  if (item) {
-    var sel = ER.addPids.indexOf(pid) > -1;
-    item.classList.toggle('selected', sel);
-    var btn = item.querySelector('button');
-    if (btn) { btn.className='psel-btn '+(sel?'remove':'add'); btn.innerHTML=sel?'&#x2212;':'&#xff0b;'; }
-  }
-  updateERPairPreview();
-}
-
-function updateERPairPreview() {
-  var el = document.getElementById('er-pair-preview');
-  if (!el) return;
-  if (ER.addPids.length === 2) {
-    var rally = C.rallies.find(function(r){return r.id===ER.rallyId;});
-    var existing = getExistingPairs(rally);
-    el.textContent = esc(pname(ER.addPids[0])) + ' & ' + esc(pname(ER.addPids[1])) + ' -> ' + existing.length + ' new match(es)';
+function updateERAddPreview() {
+  var rally = C.rallies.find(function(r){return r.id===ER.rallyId;});
+  var el = document.getElementById('er-add-preview');
+  if (!el || !rally) return;
+  var n = ER.addPids.length;
+  if (rally.type === 'single') {
+    if (!n) { el.textContent = 'Pilih 1+ player'; el.style.color='var(--t3)'; return; }
+    el.textContent = n + ' player akan ditambah';
+    el.style.color = 'var(--acc)';
   } else {
-    el.textContent = ER.addPids.length === 1 ? 'Select 1 more player' : 'Select 2 players for the pair';
+    if (!n) { el.textContent = 'Pilih genap player untuk pasangan'; el.style.color='var(--t3)'; return; }
+    if (n % 2 !== 0) { el.textContent = 'Harus genap (sekarang '+n+')'; el.style.color='var(--red)'; return; }
+    var npairs = n/2;
+    var existingPairs = getExistingPairs(rally).length;
+    el.textContent = npairs+' pasangan baru vs '+existingPairs+' pair existing';
+    el.style.color = 'var(--acc)';
   }
 }
 
+// ============================================================
+// DELETE panel
+// ============================================================
+function renderERDelete() {
+  var rally = C.rallies.find(function(r){return r.id===ER.rallyId;});
+  if (!rally) return;
+  var mCount = C.matches.filter(function(m){return m.rally_id===ER.rallyId;}).length;
+  document.getElementById('er-del-name').textContent = rally.name;
+  document.getElementById('er-del-mcount').textContent = mCount;
+}
+
+async function confirmDeleteRally() {
+  var rally = C.rallies.find(function(r){return r.id===ER.rallyId;});
+  if (!rally) return;
+  if (!confirm('Hapus '+rally.name+' secara permanen?')) return;
+  try {
+    // Delete all matches
+    var ms = C.matches.filter(function(m){return m.rally_id===ER.rallyId;});
+    await Promise.all(ms.map(function(m){return deleteMatch(m.id);}));
+    // Delete all groups
+    var gs = C.groups.filter(function(g){return g.rally_id===ER.rallyId;});
+    await Promise.all(gs.map(function(g){
+      return fetch(SUPA_URL+'/rest/v1/groups?id=eq.'+g.id, {
+        method:'DELETE', headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      });
+    }));
+    C.groups = C.groups.filter(function(g){return g.rally_id!==ER.rallyId;});
+    // Delete rally
+    await fetch(SUPA_URL+'/rest/v1/rallies?id=eq.'+ER.rallyId, {
+      method:'DELETE', headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    C.rallies = C.rallies.filter(function(r){return r.id!==ER.rallyId;});
+    closeOv('edit-rally');
+    toast(rally.name+' deleted','ok');
+    renderMatchTab(); renderStandingTab(); renderPaymentTab();
+  } catch(err) { toast(err.message,'err'); }
+}
+
+// ============================================================
+// Helpers
+// ============================================================
 function getExistingPairs(rally) {
   var pairs = rally.pairs || [];
-  if (!pairs.length) {
-    var seen = {};
-    C.matches.filter(function(m){return m.rally_id===rally.id;}).forEach(function(m){
-      var a=parseIds(m.team_a),b=parseIds(m.team_b);
-      if(a.length===2){var k=a.slice().sort().join(',');if(!seen[k])seen[k]={a:a[0],b:a[1]};}
-      if(b.length===2){var k=b.slice().sort().join(',');if(!seen[k])seen[k]={a:b[0],b:b[1]};}
-    });
-    pairs = Object.values(seen);
+  if (!pairs.length || typeof pairs === 'string') {
+    pairs = parseIds(rally.pairs) || [];
   }
+  var quitPids = parseIds(rally.quit_pids);
+  var woPids = parseIds(rally.wo_pids);
+  return pairs.filter(function(pr){
+    return quitPids.indexOf(pr.a)===-1 && quitPids.indexOf(pr.b)===-1
+      && woPids.indexOf(pr.a)===-1 && woPids.indexOf(pr.b)===-1;
+  });
+}
+
+function mixRataPairs(pids) {
+  // Pair top-half with bottom-half (highest with lowest)
+  var players = pids.map(pobj).sort(function(a,b){return Number(b.level)-Number(a.level);});
+  var half = players.length/2;
+  var top = players.slice(0,half);
+  var bot = players.slice(half).reverse();
+  var pairs = [];
+  for (var i=0;i<half;i++) pairs.push({a:top[i].id, b:bot[i].id});
   return pairs;
 }
 
-// -- Quit panel ------------------------------------------------
-function renderERQuit() {
+// ============================================================
+// Confirm Edit Rally (dispatches based on active tab)
+// ============================================================
+async function confirmEditRally() {
   var rally = C.rallies.find(function(r){return r.id===ER.rallyId;});
-  var el = document.getElementById('er-quit-list');
-  var quitPids = parseIds(rally.quit_pids);
+  if (!rally) return;
+  setBtn('btn-er-confirm', true);
+  try {
+    if (ER.tab === 'rm') {
+      await applyRemove(rally);
+    } else if (ER.tab === 'add') {
+      await applyAdd(rally);
+    }
+  } catch(err) { toast(err.message,'err'); console.error(err); }
+  finally { setBtn('btn-er-confirm', false); }
+}
 
+async function applyRemove(rally) {
+  var keys = Object.keys(ER.rmSelected);
+  if (!keys.length) { toast('Pilih minimal 1 player/pair','err'); return; }
+  var mode = ER.rmMode;
+  var modeLabel = mode === 'quit' ? 'QUIT' : 'WO';
+
+  // Build summary for confirm dialog
+  var names = [];
   if (rally.type === 'single') {
-    var pids = parseIds(rally.player_ids).filter(function(id){return quitPids.indexOf(id)===-1;});
-    if (!pids.length) { el.innerHTML='<div class="empty" style="padding:16px">No active players to quit.</div>'; return; }
-    var html = '';
-    pids.forEach(function(pid) {
-      var p = pobj(pid);
-      var lv = p.level_label || levelLabel(p.level);
-      var isSelected = ER.selectedWO === pid;
-      var done = C.matches.filter(function(m){return m.rally_id===ER.rallyId&&m.status==='done'&&(parseIds(m.team_a).indexOf(pid)>-1||parseIds(m.team_b).indexOf(pid)>-1);}).length;
-      var pend = C.matches.filter(function(m){return m.rally_id===ER.rallyId&&m.status==='pending'&&(parseIds(m.team_a).indexOf(pid)>-1||parseIds(m.team_b).indexOf(pid)>-1);}).length;
-      html += '<div class="psel-item'+(isSelected?' selected':'')+'" onclick="selectWO(\''+pid+'\')" style="cursor:pointer">';
-      html += '<div class="psel-left"><span class="badge blv'+lv+'">'+lv+'</span>';
-      html += '<div><div class="psel-name">'+esc(p.name)+'</div>';
-      html += '<div class="psel-sub">'+done+' done (kept) &middot; '+pend+' pending (deleted)</div></div></div>';
-      html += '<span style="font-size:18px;color:'+(isSelected?'var(--amber)':'var(--t3)')+'">'+(isSelected?'&#x26A0;':'&#x25CB;')+'</span>';
-      html += '</div>';
-    });
-    el.innerHTML = html;
+    keys.forEach(function(pid){names.push(pname(pid));});
   } else {
-    // Double: pairs
-    var pairs = getExistingPairs(rally);
-    var activePairs = pairs.filter(function(pair){return quitPids.indexOf(pair.a)===-1&&quitPids.indexOf(pair.b)===-1;});
-    if (!activePairs.length) { el.innerHTML='<div class="empty" style="padding:16px">No active pairs to quit.</div>'; return; }
-    var html = '';
-    activePairs.forEach(function(pair) {
-      var isSelected = ER.selectedWO && ((ER.selectedWO.a===pair.a&&ER.selectedWO.b===pair.b)||(ER.selectedWO.a===pair.b&&ER.selectedWO.b===pair.a));
-      var pKey = [pair.a,pair.b].sort().join(',');
-      var done = C.matches.filter(function(m){
-        var tA=parseIds(m.team_a).sort().join(','), tB=parseIds(m.team_b).sort().join(',');
-        return m.rally_id===ER.rallyId&&m.status==='done'&&(tA===pKey||tB===pKey);
-      }).length;
-      var pend = C.matches.filter(function(m){
-        var tA=parseIds(m.team_a).sort().join(','), tB=parseIds(m.team_b).sort().join(',');
-        return m.rally_id===ER.rallyId&&m.status==='pending'&&(tA===pKey||tB===pKey);
-      }).length;
-      html += '<div class="psel-item'+(isSelected?' selected':'')+'" onclick="selectWOPair(\''+pair.a+'\',\''+pair.b+'\')" style="cursor:pointer">';
-      html += '<div class="psel-left"><div class="p-av av'+(pobj(pair.a).level_label||'C')+'" style="width:26px;height:26px;font-size:11px">'+pobj(pair.a).name.charAt(0)+'</div>';
-      html += '<div><div class="psel-name">'+esc(pname(pair.a))+' &amp; '+esc(pname(pair.b))+'</div>';
-      html += '<div class="psel-sub">'+done+' done (kept) &middot; '+pend+' pending (deleted)</div></div></div>';
-      html += '<span style="font-size:18px;color:'+(isSelected?'var(--amber)':'var(--t3)')+'">'+(isSelected?'&#x26A0;':'&#x25CB;')+'</span>';
-      html += '</div>';
+    keys.forEach(function(k){
+      var pr = ER.rmSelected[k];
+      names.push(pname(pr.a)+' & '+pname(pr.b));
     });
-    el.innerHTML = html;
+  }
+  if (!confirm(modeLabel+' '+names.length+' '+(rally.type==='single'?'player':'pair')+'?\n\n'+names.join('\n'))) return;
+
+  if (mode === 'quit') {
+    await doQuit(rally, keys);
+  } else {
+    await doWO(rally, keys);
   }
 }
 
-// -- Confirm Edit Rally ----------------------------------------
-async function confirmEditRally() {
-  var rally = C.rallies.find(function(r){return r.id===ER.rallyId;});
-  setBtn('btn-er-confirm', true);
+async function doQuit(rally, keys) {
+  var addQuitPids = [];
+  if (rally.type === 'single') {
+    keys.forEach(function(pid){addQuitPids.push(pid);});
+  } else {
+    keys.forEach(function(k){
+      var pr = ER.rmSelected[k];
+      addQuitPids.push(pr.a, pr.b);
+    });
+  }
 
-  try {
-    if (ER.tab === 'wo') {
-      if (!ER.selectedWO) { toast('Select a player/pair to WO','err'); setBtn('btn-er-confirm',false); return; }
+  // Mark pending matches involving these players as 'void' (cancel)
+  var pendingMs = C.matches.filter(function(m){
+    if (m.rally_id !== ER.rallyId || m.status !== 'pending') return false;
+    var all = parseIds(m.team_a).concat(parseIds(m.team_b));
+    return all.some(function(id){return addQuitPids.indexOf(id)>-1;});
+  });
+  // Set each to void via API
+  await Promise.all(pendingMs.map(function(m){
+    return DB.voidMatch(m.id).then(function(){
+      m.status = 'void'; m.result = 'void';
+    });
+  }));
 
-      if (rally.type === 'single') {
-        var pid = ER.selectedWO;
-        // Find and delete all matches involving this player
-        var toDelete = C.matches.filter(function(m){
-          return m.rally_id===ER.rallyId &&
-            (parseIds(m.team_a).indexOf(pid)>-1 || parseIds(m.team_b).indexOf(pid)>-1);
+  var newQuitPids = parseIds(rally.quit_pids).concat(addQuitPids);
+  await DB.updateRally(ER.rallyId, {quit_pids: newQuitPids});
+  rally.quit_pids = newQuitPids;
+
+  toast(addQuitPids.length+' marked QUIT, '+pendingMs.length+' pending cancelled','ok');
+  closeOv('edit-rally');
+  renderMatchTab(); renderStandingTab();
+}
+
+async function doWO(rally, keys) {
+  if (rally.type === 'single') {
+    var pids = keys;
+    // Delete all matches involving any selected pid
+    var toDelete = C.matches.filter(function(m){
+      if (m.rally_id !== ER.rallyId) return false;
+      var all = parseIds(m.team_a).concat(parseIds(m.team_b));
+      return all.some(function(id){return pids.indexOf(id)>-1;});
+    });
+    await Promise.all(toDelete.map(function(m){return deleteMatch(m.id);}));
+    // Remove from player_ids, add to wo_pids
+    var newPids = parseIds(rally.player_ids).filter(function(id){return pids.indexOf(id)===-1;});
+    var newWoPids = parseIds(rally.wo_pids).concat(pids);
+    // Remove from groups too
+    var groups = C.groups.filter(function(g){return g.rally_id===ER.rallyId;});
+    await Promise.all(groups.map(function(g){
+      var gp = parseIds(g.player_ids).filter(function(id){return pids.indexOf(id)===-1;});
+      g.player_ids = gp;
+      return DB.updateGroup(g.id, {player_ids: gp});
+    }));
+    await DB.updateRally(ER.rallyId, {player_ids: newPids, wo_pids: newWoPids});
+    rally.player_ids = newPids; rally.wo_pids = newWoPids;
+    toast(pids.length+' WO, '+toDelete.length+' match deleted','ok');
+
+  } else {
+    // Double
+    var keyPairs = keys.map(function(k){return ER.rmSelected[k];});
+    var removedPidSet = {};
+    keyPairs.forEach(function(pr){removedPidSet[pr.a]=1;removedPidSet[pr.b]=1;});
+    var toDelete = C.matches.filter(function(m){
+      if (m.rally_id !== ER.rallyId) return false;
+      var all = parseIds(m.team_a).concat(parseIds(m.team_b));
+      return all.some(function(id){return removedPidSet[id];});
+    });
+    await Promise.all(toDelete.map(function(m){return deleteMatch(m.id);}));
+    var newPairs = (rally.pairs||[]).filter(function(pr){
+      return !keyPairs.some(function(kp){return (kp.a===pr.a&&kp.b===pr.b)||(kp.a===pr.b&&kp.b===pr.a);});
+    });
+    var newPids = parseIds(rally.player_ids).filter(function(id){return !removedPidSet[id];});
+    var newWoPids = parseIds(rally.wo_pids).concat(Object.keys(removedPidSet));
+    var newWoPairs = (parseIds(rally.wo_pairs)||[]).concat(keyPairs);
+    await DB.updateRally(ER.rallyId, {pairs: newPairs, player_ids: newPids, wo_pids: newWoPids, wo_pairs: newWoPairs});
+    rally.pairs = newPairs; rally.player_ids = newPids; rally.wo_pids = newWoPids; rally.wo_pairs = newWoPairs;
+    toast(keyPairs.length+' pair WO, '+toDelete.length+' match deleted','ok');
+  }
+  closeOv('edit-rally');
+  renderMatchTab(); renderStandingTab();
+}
+
+async function applyAdd(rally) {
+  if (!ER.addPids.length) { toast('Pilih minimal 1 player','err'); return; }
+  var pids = ER.addPids.slice();
+
+  if (rally.type === 'single') {
+    var groups = C.groups.filter(function(g){return g.rally_id===ER.rallyId;});
+    var targetGroup = groups.length ? C.groups.find(function(g){return g.id===ER.addGroupId;}) : null;
+
+    // For each new player, generate matches vs existing opponents
+    var existingOpponents = targetGroup
+      ? parseIds(targetGroup.player_ids)
+      : parseIds(rally.player_ids).filter(function(id){
+          return parseIds(rally.quit_pids).indexOf(id)===-1 && parseIds(rally.wo_pids).indexOf(id)===-1;
         });
-        await Promise.all(toDelete.map(function(m){ return deleteMatch(m.id); }));
-        // Remove player from rally player_ids
-        var newPids = parseIds(rally.player_ids).filter(function(id){return id!==pid;});
-        await DB.updateRally(ER.rallyId, {player_ids: newPids});
-        rally.player_ids = newPids;
-        toast(pname(pid) + ' WO -- ' + toDelete.length + ' match(es) deleted', 'ok');
 
-      } else {
-        // Double: delete all matches for this pair
-        var pairA = ER.selectedWO.a, pairB = ER.selectedWO.b;
-        var pairKey = [pairA,pairB].sort().join(',');
-        var toDelete = C.matches.filter(function(m){
-          var tA=parseIds(m.team_a).sort().join(','), tB=parseIds(m.team_b).sort().join(',');
-          return m.rally_id===ER.rallyId && (tA===pairKey||tB===pairKey);
-        });
-        await Promise.all(toDelete.map(function(m){ return deleteMatch(m.id); }));
-        // Remove pair from rally.pairs and player_ids
-        var newPairs = (rally.pairs||[]).filter(function(p){
-          return !((p.a===pairA&&p.b===pairB)||(p.a===pairB&&p.b===pairA));
-        });
-        var newPids = parseIds(rally.player_ids).filter(function(id){return id!==pairA&&id!==pairB;});
-        await DB.updateRally(ER.rallyId, {pairs: newPairs, player_ids: newPids});
-        rally.pairs = newPairs; rally.player_ids = newPids;
-        toast(pname(pairA)+' & '+pname(pairB)+' WO -- '+toDelete.length+' match(es) deleted','ok');
-      }
+    if (!confirm('Add '+pids.length+' player?\n\n'+pids.map(pname).join('\n'))) return;
 
-    } else if (ER.tab === 'quit') {
-      // QUIT: mark player/pair as quit, delete pending matches, keep done matches
-      if (!ER.selectedWO) { toast('Select a player/pair to quit','err'); setBtn('btn-er-confirm',false); return; }
-
-      if (rally.type === 'single') {
-        var pid = ER.selectedWO;
-        // Delete only pending matches for this player
-        var pendingMs = C.matches.filter(function(m){
-          return m.rally_id===ER.rallyId && m.status==='pending' &&
-            (parseIds(m.team_a).indexOf(pid)>-1 || parseIds(m.team_b).indexOf(pid)>-1);
-        });
-        await Promise.all(pendingMs.map(function(m){return deleteMatch(m.id);}));
-        // Add to quit_pids
-        var quitPids = parseIds(rally.quit_pids).concat([pid]);
-        await DB.updateRally(ER.rallyId, {quit_pids: quitPids});
-        rally.quit_pids = quitPids;
-        toast(pname(pid)+' quit -- '+pendingMs.length+' pending deleted, done matches kept','ok');
-
-      } else {
-        // Double: pair quit
-        var pairA = ER.selectedWO.a, pairB = ER.selectedWO.b;
-        var pairKey = [pairA,pairB].sort().join(',');
-        var pendingMs = C.matches.filter(function(m){
-          var tA=parseIds(m.team_a).sort().join(','), tB=parseIds(m.team_b).sort().join(',');
-          return m.rally_id===ER.rallyId && m.status==='pending' && (tA===pairKey||tB===pairKey);
-        });
-        await Promise.all(pendingMs.map(function(m){return deleteMatch(m.id);}));
-        var quitPids = parseIds(rally.quit_pids).concat([pairA, pairB]);
-        await DB.updateRally(ER.rallyId, {quit_pids: quitPids});
-        rally.quit_pids = quitPids;
-        toast(pname(pairA)+' & '+pname(pairB)+' quit -- '+pendingMs.length+' pending deleted','ok');
-      }
-
-    } else {
-      // ADD
-      if (rally.type === 'single') {
-        if (!ER.addPids.length) { toast('Select a player to add','err'); setBtn('btn-er-confirm',false); return; }
-        var newPid = ER.addPids[0];
-        var groups = C.groups.filter(function(g){return g.rally_id===ER.rallyId;});
-        var targetGroupId = groups.length ? (ER.addGroupId||document.getElementById('er-group-sel').value||null) : null;
-
-        // Find opponents: all players in same group (or all if no group)
-        var opponents;
-        if (targetGroupId) {
-          var grp = C.groups.find(function(g){return g.id===targetGroupId;});
-          opponents = grp ? parseIds(grp.player_ids) : [];
-          // Add player to group
-          var newGPids = parseIds(grp.player_ids).concat([newPid]);
-          await DB.updateGroup(targetGroupId, {player_ids: newGPids});
-          grp.player_ids = newGPids;
-        } else {
-          opponents = parseIds(rally.player_ids);
-        }
-        opponents = opponents.filter(function(id){return id!==newPid;});
-
-        // Generate new matches (newPid vs each opponent)
-        var newMatches = await Promise.all(opponents.map(function(oppId){
-          return DB.createMatch({rallyId:ER.rallyId,sessionId:rally.session_id,groupId:targetGroupId||null,teamA:[newPid],teamB:[oppId]}).then(function(m){
-            C.matches.push(m); C.scores[m.id]={sa:0,sb:0}; return m;
-          });
-        }));
-
-        // Update rally player_ids
-        var newPids = parseIds(rally.player_ids).concat([newPid]);
-        await DB.updateRally(ER.rallyId, {player_ids: newPids});
-        rally.player_ids = newPids;
-        toast(pname(newPid)+' added -- '+newMatches.length+' new match(es)','ok');
-
-      } else {
-        // Double add pair
-        if (ER.addPids.length !== 2) { toast('Select exactly 2 players for a pair','err'); setBtn('btn-er-confirm',false); return; }
-        var newA = ER.addPids[0], newB = ER.addPids[1];
-        var existingPairs = getExistingPairs(rally);
-
-        // Generate matches: new pair vs all existing pairs
-        var newMatches = await Promise.all(existingPairs.map(function(ep){
-          return DB.createMatch({rallyId:ER.rallyId,sessionId:rally.session_id,groupId:null,teamA:[newA,newB],teamB:[ep.a,ep.b]}).then(function(m){
-            C.matches.push(m); C.scores[m.id]={sa:0,sb:0}; return m;
-          });
-        }));
-
-        // Update rally pairs + player_ids
-        var updatedPairs = (rally.pairs||existingPairs).concat([{a:newA,b:newB}]);
-        var newPids = parseIds(rally.player_ids).filter(function(id){return[newA,newB].indexOf(id)===-1;}).concat([newA,newB]);
-        await DB.updateRally(ER.rallyId, {pairs:updatedPairs,player_ids:newPids});
-        rally.pairs = updatedPairs; rally.player_ids = newPids;
-        toast(pname(newA)+'&'+pname(newB)+' added -- '+newMatches.length+' new match(es)','ok');
-      }
+    var totalNewMatches = 0;
+    for (var i=0;i<pids.length;i++) {
+      var newPid = pids[i];
+      var opps = existingOpponents.slice();
+      // Also play vs other new players added in this batch (before this one)
+      for (var j=0;j<i;j++) opps.push(pids[j]);
+      var ms = await Promise.all(opps.map(function(oid){
+        return DB.createMatch({
+          rallyId: ER.rallyId, sessionId: rally.session_id,
+          groupId: targetGroup ? targetGroup.id : null,
+          teamA: [newPid], teamB: [oid]
+        }).then(function(m){ C.matches.push(m); C.scores[m.id]={sa:0,sb:0}; return m; });
+      }));
+      totalNewMatches += ms.length;
     }
 
-    closeOv('edit-rally');
-    renderMatchTab();
-    renderStandingTab();
+    var newPids = parseIds(rally.player_ids).concat(pids);
+    await DB.updateRally(ER.rallyId, {player_ids: newPids});
+    rally.player_ids = newPids;
+    if (targetGroup) {
+      var newGPids = parseIds(targetGroup.player_ids).concat(pids);
+      await DB.updateGroup(targetGroup.id, {player_ids: newGPids});
+      targetGroup.player_ids = newGPids;
+    }
+    toast(pids.length+' player added, '+totalNewMatches+' match','ok');
 
-  } catch(err) { toast(err.message,'err'); }
-  finally { setBtn('btn-er-confirm',false); }
+  } else {
+    // Double — must be even
+    if (pids.length % 2 !== 0) { toast('Harus genap','err'); return; }
+    var newPairs = mixRataPairs(pids);
+    var previewNames = newPairs.map(function(pr){return pname(pr.a)+' & '+pname(pr.b);}).join('\n');
+    if (!confirm('Tambah '+newPairs.length+' pasangan baru?\n\n'+previewNames)) return;
+
+    var existingPairs = getExistingPairs(rally);
+    var totalNewMatches = 0;
+    // Each new pair plays all existing + earlier-added-in-this-batch pairs
+    for (var i=0;i<newPairs.length;i++) {
+      var np = newPairs[i];
+      var opps = existingPairs.slice();
+      for (var j=0;j<i;j++) opps.push(newPairs[j]);
+      var ms = await Promise.all(opps.map(function(op){
+        return DB.createMatch({
+          rallyId: ER.rallyId, sessionId: rally.session_id, groupId: null,
+          teamA: [np.a, np.b], teamB: [op.a, op.b]
+        }).then(function(m){ C.matches.push(m); C.scores[m.id]={sa:0,sb:0}; return m; });
+      }));
+      totalNewMatches += ms.length;
+    }
+
+    var allPairs = (rally.pairs||[]).concat(newPairs);
+    var newPids = parseIds(rally.player_ids).concat(pids);
+    await DB.updateRally(ER.rallyId, {pairs: allPairs, player_ids: newPids});
+    rally.pairs = allPairs; rally.player_ids = newPids;
+    toast(newPairs.length+' pair added, '+totalNewMatches+' match','ok');
+  }
+
+  closeOv('edit-rally');
+  renderMatchTab(); renderStandingTab();
 }
 
 async function deleteMatch(mid) {
@@ -2709,10 +3216,120 @@ async function saveQuickEditPlayer() {
   } catch(err) { toast(err.message,'err'); }
 }
 
-
 // ============================================
 // INIT
 // ============================================
+
+// ============================================================
+// NO RALLY MODE (session latihan, bill split rata)
+// ============================================================
+var NR = { pids: [] };
+
+function openNoRally() {
+  var sess = C.sessions.find(function(s){return s.id===S.activeSid;});
+  if (!sess) return;
+  // Check if any rally exists (must be zero)
+  var rallies = C.rallies.filter(function(r){return r.session_id===sess.id;});
+  if (rallies.length > 0) { toast('Sudah ada rally, tidak bisa no-rally','err'); return; }
+  NR.pids = parseIds(sess.no_rally_pids);
+  renderNRList();
+  openOv('no-rally');
+}
+
+function renderNRList() {
+  var html = '';
+  C.players.slice().sort(function(a,b){return Number(b.level)-Number(a.level);}).forEach(function(p){
+    var lv = p.level_label || levelLabel(p.level);
+    var sel = NR.pids.indexOf(p.id) > -1;
+    html += '<div class="psel-item'+(sel?' selected':'')+'" onclick="toggleNRPid(\''+p.id+'\')" style="cursor:pointer">';
+    html += '<div class="psel-left"><span class="badge blv'+lv+'">'+lv+'</span>';
+    html += '<div><div class="psel-name">'+esc(p.name)+'</div><div class="psel-sub">'+p.level+'</div></div></div>';
+    html += '<input type="checkbox" '+(sel?'checked':'')+' style="width:18px;height:18px;pointer-events:none;accent-color:var(--acc)"/>';
+    html += '</div>';
+  });
+  document.getElementById('nr-player-list').innerHTML = html;
+  document.getElementById('nr-preview').textContent = NR.pids.length > 0
+    ? NR.pids.length + ' player akan split bill rata'
+    : 'Pilih minimal 1 player';
+}
+
+function toggleNRPid(pid) {
+  var idx = NR.pids.indexOf(pid);
+  if (idx > -1) NR.pids.splice(idx, 1);
+  else NR.pids.push(pid);
+  renderNRList();
+}
+
+async function confirmNoRally() {
+  if (!NR.pids.length) { toast('Pilih minimal 1 player','err'); return; }
+  setBtn('btn-nr-confirm', true);
+  try {
+    var sess = C.sessions.find(function(s){return s.id===S.activeSid;});
+    await fetch(SUPA_URL+'/rest/v1/sessions?id=eq.'+sess.id, {
+      method: 'PATCH',
+      headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
+      body: JSON.stringify({no_rally_pids: NR.pids})
+    });
+    sess.no_rally_pids = NR.pids.slice();
+    closeOv('no-rally');
+    toast('Saved, '+NR.pids.length+' player','ok');
+    renderMatchTab(); renderPaymentTab();
+  } catch(err) { toast(err.message,'err'); }
+  finally { setBtn('btn-nr-confirm', false); }
+}
+
+function openQuickAddNR() {
+  document.getElementById('inp-qpname').value = '';
+  S._quickAddRefresh = 'nr';
+  openOv('quick-player');
+}
+
+// ============================================================
+// DELETE SESSION
+// ============================================================
+function openDeleteSessionConfirm(sid) {
+  var sess = C.sessions.find(function(s){return s.id===sid;});
+  if (!sess) return;
+  S._delSid = sid;
+  document.getElementById('del-sess-name').textContent = sess.name;
+  openOv('del-session');
+}
+
+async function doDeleteSession() {
+  var sid = S._delSid;
+  if (!sid) return;
+  try {
+    // Cascade delete: matches, groups, rallies, bill_entries, donation_entries, player_payments, bills, session
+    var endpoints = [
+      'matches?session_id=eq.'+sid,
+      'groups?session_id=eq.'+sid,
+      'rallies?session_id=eq.'+sid,
+      'bill_entries?session_id=eq.'+sid,
+      'donation_entries?session_id=eq.'+sid,
+      'player_payments?session_id=eq.'+sid,
+      'bills?session_id=eq.'+sid,
+      'sessions?id=eq.'+sid,
+    ];
+    for (var i=0; i<endpoints.length; i++) {
+      await fetch(SUPA_URL+'/rest/v1/'+endpoints[i], {
+        method:'DELETE', headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+      });
+    }
+    // Clean local cache
+    C.sessions = C.sessions.filter(function(s){return s.id!==sid;});
+    C.rallies = C.rallies.filter(function(r){return r.session_id!==sid;});
+    C.matches = C.matches.filter(function(m){return m.session_id!==sid;});
+    C.groups = C.groups.filter(function(g){return g.session_id!==sid;});
+    if (C.bills) delete C.bills[sid];
+    if (C.playerPayments) delete C.playerPayments[sid];
+    closeOv('del-session');
+    toast('Session deleted','ok');
+    if (S.activeSid === sid) { S.activeSid = null; navigate('session'); }
+    renderSessionsList();
+  } catch(err) { toast(err.message,'err'); }
+}
+
+
 boot();
 </script>
 </body>
