@@ -408,9 +408,32 @@ input[type=number]{-moz-appearance:textfield}
 <div class="overlay hidden" id="ov-close-bill"><div class="sheet">
   <div class="sheet-hdr"><div class="sheet-title">Close Bill</div><button class="close-x" onclick="closeOv('close-bill')">&#x2715;</button></div>
   <div class="sheet-body">
-    <p style="color:var(--t2);font-size:14px;margin-bottom:14px">Bill akan ditutup dan session otomatis closed. Masukkan rekening untuk pembayaran.</p>
     <div class="fgrp"><label>Bank / E-wallet Account</label><input type="text" id="inp-close-bank" placeholder="BCA 1234567890 a/n Nama"/></div>
-    <div id="close-bill-summary" style="font-family:'DM Mono',monospace;font-size:12px;color:var(--t2);line-height:1.8;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--rsm);padding:12px;margin-top:8px"></div>
+
+    <!-- Latihan prompt (shown if no latihan set AND rally exists) -->
+    <div id="cb-latihan-ask" class="fgrp hidden">
+      <label>Apakah Ada Sesi Latihan?</label>
+      <div class="toggle-row">
+        <div class="tgl on" data-cb-latihan="no" onclick="setCBLatihan('no')">Tidak</div>
+        <div class="tgl" data-cb-latihan="yes" onclick="setCBLatihan('yes')">Ya</div>
+      </div>
+    </div>
+
+    <!-- Latihan player pick (shown if user said "Ya" and rally exists) -->
+    <div id="cb-latihan-players" class="fgrp hidden">
+      <label>Player Sesi Latihan (kosong = semua player rally)</label>
+      <div class="psel-list" id="cb-latihan-list" style="max-height:180px"></div>
+    </div>
+
+    <!-- Time inputs (shown if latihan exists AND rally exists) -->
+    <div id="cb-time-wrap" class="fgrp hidden">
+      <label>Waktu Total Session (menit)</label>
+      <input type="number" id="inp-session-min" placeholder="contoh 180" min="1" oninput="updateCBSummary()"/>
+      <label style="margin-top:10px">Waktu Sesi Latihan (menit)</label>
+      <input type="number" id="inp-latihan-min" placeholder="contoh 30" min="1" oninput="updateCBSummary()"/>
+    </div>
+
+    <div id="close-bill-summary" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--t2);line-height:1.7;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--rsm);padding:12px;margin-top:8px;white-space:pre-wrap"></div>
   </div>
   <div class="sheet-foot"><button class="btn b-ghost" onclick="closeOv('close-bill')">Cancel</button><button class="btn b-danger" id="btn-do-close-bill" onclick="doCloseBill()">Close Bill &amp; Session</button></div>
 </div></div>
@@ -514,21 +537,43 @@ input[type=number]{-moz-appearance:textfield}
 </div></div>
 
 
-<!-- No Rally modal -->
-<div class="overlay hidden" id="ov-no-rally"><div class="sheet">
+<!-- Sesi Latihan modal -->
+<div class="overlay hidden" id="ov-latihan"><div class="sheet">
   <div class="sheet-hdr">
-    <div class="sheet-title">Tanpa Rally (Latihan)</div>
-    <button class="close-x" onclick="closeOv('no-rally')">&#x2715;</button>
+    <div class="sheet-title">Sesi Latihan</div>
+    <button class="close-x" onclick="closeOv('latihan')">&#x2715;</button>
   </div>
   <div class="sheet-body">
-    <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--t3);margin-bottom:10px">Pilih player yang hadir latihan. Bill akan di-split rata.</p>
-    <div id="nr-player-list" class="psel-list"></div>
-    <button class="btn b-ghost b-sm b-full" style="margin-top:8px" onclick="openQuickAddNR()">+ New Player</button>
-    <div id="nr-preview" style="margin-top:12px;font-family:'DM Mono',monospace;font-size:12px;color:var(--acc)"></div>
+    <p id="latihan-hint" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--t2);margin-bottom:10px;line-height:1.5"></p>
+    <div id="latihan-player-list" class="psel-list"></div>
+    <button class="btn b-ghost b-sm b-full" style="margin-top:8px" onclick="openQuickAddLatihan()">+ New Player</button>
+    <div id="latihan-preview" style="margin-top:12px;font-family:'DM Mono',monospace;font-size:12px"></div>
   </div>
   <div class="sheet-foot">
-    <button class="btn b-ghost" onclick="closeOv('no-rally')">Cancel</button>
-    <button class="btn b-acc" id="btn-nr-confirm" onclick="confirmNoRally()">Save</button>
+    <button class="btn b-danger b-sm" onclick="clearLatihan()" style="margin-right:auto">Hapus Latihan</button>
+    <button class="btn b-ghost" onclick="closeOv('latihan')">Cancel</button>
+    <button class="btn b-acc" id="btn-latihan-confirm" onclick="confirmLatihan()">Save</button>
+  </div>
+</div></div>
+
+
+<!-- Edit Session -->
+<div class="overlay hidden" id="ov-edit-session"><div class="sheet">
+  <div class="sheet-hdr">
+    <div class="sheet-title">Edit Session</div>
+    <button class="close-x" onclick="closeOv('edit-session')">&#x2715;</button>
+  </div>
+  <div class="sheet-body">
+    <div class="fgrp"><label>Session Name</label><input type="text" id="es-name"/></div>
+    <div class="fgrp"><label>Date</label><input type="date" id="es-date"/></div>
+    <div class="fgrp"><label>Venue</label><input type="text" id="es-venue" placeholder="Optional"/></div>
+    <div class="sep"></div>
+    <button class="btn b-danger b-full" id="btn-es-delete" onclick="deleteSessionFromEdit()">Hapus Session</button>
+    <div id="es-delete-note" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--t3);margin-top:6px;text-align:center"></div>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn b-ghost" onclick="closeOv('edit-session')">Cancel</button>
+    <button class="btn b-acc" id="btn-es-save" onclick="saveEditSession()">Save</button>
   </div>
 </div></div>
 
@@ -986,17 +1031,12 @@ function renderSessionList(){
   sessions.forEach(function(s){
     var isAct=s.status==='active';
     // Can delete only if no bill exists and no matches
-    var hasBill=!!(C.bills&&C.bills[s.id]);
-    var hasMatches=C.matches.filter(function(m){return m.session_id===s.id;}).length>0;
-    var canDelete=!hasBill&&!hasMatches;
     html+='<div class="sess-card'+(isAct?' act':'')+'" style="position:relative">';
     html+='<div onclick="navigate(\'session\',{sid:\''+s.id+'\'})">';
     html+='<div class="row-bet"><div class="sess-name">'+esc(s.name)+'</div><span class="badge '+(isAct?'ba':'bc')+'">'+(isAct?'ACTIVE':'CLOSED')+'</span></div>';
     html+='<div class="sess-meta">'+fmtDate(s.date)+(s.venue?' \u00b7 '+esc(s.venue):'')+'</div>';
     html+='</div>';
-    if(canDelete){
-      html+='<button class="btn b-ghost b-xs" onclick="event.stopPropagation();openDeleteSessionConfirm(\''+s.id+'\')" style="position:absolute;top:8px;right:8px;padding:4px 8px;color:var(--red);border-color:var(--red-dim);font-size:10px">Delete</button>';
-    }
+    
     html+='</div>';
   });
   document.getElementById('sessions-list').innerHTML=html;
@@ -1079,52 +1119,59 @@ function renderMatchTab(){
   if(!sess){el.innerHTML='<div class="empty">No session.</div>';return;}
   var rallies=C.rallies.filter(function(r){return r.session_id===sess.id;});
   var isActive=sess.status==='active';
-  var noRallyPids=parseIds(sess.no_rally_pids);
-  var isNoRally=noRallyPids.length>0 && rallies.length===0;
-  var html='<div class="sess-hero"><div class="sess-hero-name">'+esc(sess.name)+'</div>';
-  html+='<div class="sess-hero-meta"><span class="badge '+(isActive?'ba':'bc')+'">'+(isActive?'ACTIVE':'CLOSED')+'</span>';
+  var latihanPids=parseIds(sess.latihan_pids);
+  var hasLatihan=latihanPids.length>0 || sess.latihan_pids===null && false; // latihan_pids=[] means "all rally players"
+  // Actually: null = not set, [] = set to "all rally players", [pids] = specific list
+  var latihanSet=sess.latihan_pids!==null && sess.latihan_pids!==undefined;
+  var html='<div class="sess-hero" style="position:relative"><div class="row-bet" style="align-items:flex-start">';
+  html+='<div style="flex:1;min-width:0"><div class="sess-hero-name">'+esc(sess.name)+'</div>';
+  html+='<div class="sess-hero-meta" style="margin-top:4px"><span class="badge '+(isActive?'ba':'bc')+'">'+(isActive?'ACTIVE':'CLOSED')+'</span>';
   html+='<span class="meta-chip">'+fmtDate(sess.date)+'</span>';
   if(sess.venue)html+='<span class="meta-chip">&#x1F4CD; '+esc(sess.venue)+'</span>';
-  if(isNoRally)html+='<span class="badge bpend">NO RALLY</span>';
+  if(latihanSet)html+='<span class="badge bpend">LATIHAN</span>';
+  html+='</div></div>';
+  if(isActive){
+    html+='<button class="btn b-ghost b-xs" onclick="openEditSession()" style="padding:4px 8px;font-size:11px;gap:3px">&#x270E;</button>';
+  }
   html+='</div>';
   if(isActive){
     html+='<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">';
-    html+='<button class="btn b-acc b-sm" onclick="openGenRally()">+ Generate Rally</button>';
-    // No Rally button: only if no rallies yet
-    if(!rallies.length){
-      html+='<button class="btn b-ghost b-sm" onclick="openNoRally()">'+(isNoRally?'&#x270E; Edit Tanpa Rally':'+ Tanpa Rally')+'</button>';
-    }
+    html+='<button class="btn b-acc b-sm" onclick="openGenRally()">+ Rally</button>';
+    html+='<button class="btn b-ghost b-sm" onclick="openLatihan()">'+(latihanSet?'&#x270E; Edit Latihan':'+ Sesi Latihan')+'</button>';
     html+='</div>';
   } else html+='<div style="margin-top:8px;font-family:DM Mono,monospace;font-size:11px;color:var(--t3)">&#x1F512; Session closed</div>';
   html+='</div>';
 
-  // Hint: if no rally AND no no-rally, show explanation
-  if(isActive && !rallies.length && !isNoRally){
-    html+='<div class="card" style="margin-bottom:14px;border-left:3px solid var(--acc)"><div style="font-family:DM Mono,monospace;font-size:10px;letter-spacing:1px;color:var(--acc);margin-bottom:6px">PILIH MODE</div>';
+  // Hint: only if nothing chosen yet
+  if(isActive && !rallies.length && !latihanSet){
+    html+='<div class="card" style="margin-bottom:14px;border-left:3px solid var(--acc)"><div style="font-family:DM Mono,monospace;font-size:10px;letter-spacing:1px;color:var(--acc);margin-bottom:6px">PILIH AKTIVITAS</div>';
     html+='<div style="font-size:13px;color:var(--t2);line-height:1.5">';
-    html+='<strong style="color:var(--t1)">Generate Rally</strong> -- Main dengan rally (single/double), level-based, standing, H2H<br/><br/>';
-    html+='<strong style="color:var(--t1)">Tanpa Rally</strong> -- Sesi latihan bebas. Pilih player yang hadir, bill split rata di antara mereka. Level tidak terpengaruh.';
+    html+='<strong style="color:var(--t1)">+ Rally</strong> -- Main dengan rally (single/double), ada standing & level<br/><br/>';
+    html+='<strong style="color:var(--t1)">+ Sesi Latihan</strong> -- Latihan bebas tanpa rally. Bisa digabung dengan rally nanti.';
     html+='</div></div>';
   }
 
-  // No-rally view: show player list + count
-  if(isNoRally){
-    html+='<div class="sec-title">PLAYER HADIR ('+noRallyPids.length+')</div>';
-    html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">';
-    noRallyPids.forEach(function(pid){
-      var p=pobj(pid);
-      var lv=p.level_label||levelLabel(p.level);
-      html+='<div class="pair-row" style="padding:6px 10px">';
-      html+='<span class="badge blv'+lv+'" style="padding:1px 5px;margin-right:6px">'+lv+'</span>';
-      html+='<span style="font-size:12px">'+esc(p.name)+'</span></div>';
-    });
+  // Latihan indicator card (if set)
+  if(latihanSet){
+    var latihanDisplay=latihanPids.length>0?latihanPids:(rallies.length>0?getAllRallyPids(rallies):[]);
+    var labelText=latihanPids.length===0?'Semua player rally':(latihanPids.length+' player terpilih');
+    html+='<div class="card" style="margin-bottom:14px;background:var(--bg-raised);border-color:var(--amber);border-left:3px solid var(--amber)">';
+    html+='<div class="row-bet" style="margin-bottom:8px"><div style="font-family:DM Mono,monospace;font-size:10px;letter-spacing:1px;color:var(--amber)">SESI LATIHAN &middot; '+labelText+'</div>';
+    html+='<button class="btn b-ghost b-xs" onclick="openLatihan()" style="padding:3px 8px;font-size:10px">Edit</button></div>';
+    if(latihanDisplay.length>0){
+      html+='<div style="display:flex;flex-wrap:wrap;gap:4px">';
+      latihanDisplay.forEach(function(pid){
+        var p=pobj(pid);if(!p)return;
+        var lv=p.level_label||levelLabel(p.level);
+        html+='<span style="background:var(--bg-card);padding:3px 8px;border-radius:99px;font-size:11px;display:inline-flex;align-items:center;gap:4px"><span class="badge blv'+lv+'" style="padding:1px 4px;font-size:9px">'+lv+'</span>'+esc(p.name)+'</span>';
+      });
+      html+='</div>';
+    }
     html+='</div>';
-    html+='<div class="card" style="background:var(--bg-raised);border-color:var(--border)"><div style="font-family:DM Mono,monospace;font-size:10px;color:var(--t3);margin-bottom:4px">LATIHAN BEBAS</div>';
-    html+='<div style="font-size:13px;color:var(--t2)">Bill akan di-split rata di antara '+noRallyPids.length+' player. Level tidak terpengaruh.</div></div>';
   }
 
   if(!rallies.length){
-    if(!isNoRally)html+='<div class="empty">'+(isActive?'':'No rallies.')+'</div>';
+    if(!latihanSet)html+='<div class="empty">'+(isActive?'':'No rallies.')+'</div>';
   } else {
     // Search bar
     html+='<div class="search-bar">';
@@ -1791,14 +1838,14 @@ async function confirmGenerate(){
 
     C.rallies.push(rally);
     closeOv('gen-rally');
-    // Clear no-rally mode if active
+    // Clear latihan mode if active
     var sess = C.sessions.find(function(s){return s.id===sid;});
-    if (sess && sess.no_rally_pids) {
+    if (sess && sess.latihan_pids) {
       await fetch(SUPA_URL+'/rest/v1/sessions?id=eq.'+sid, {
         method:'PATCH', headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
-        body: JSON.stringify({no_rally_pids: null})
+        body: JSON.stringify({latihan_pids: null})
       });
-      sess.no_rally_pids = null;
+      sess.latihan_pids = null;
     }
     toast('Rally generated!','ok');
     renderMatchTab();renderStandingTab();renderPaymentTab();
@@ -1828,10 +1875,10 @@ function renderStandingTab(){
   var sess=C.sessions.find(function(s){return s.id===S.activeSid;});
   if(!sess){el.innerHTML='<div class="empty">No session.</div>';return;}
   var rallies=C.rallies.filter(function(r){return r.session_id===sess.id;}).sort(function(a,b){var aC=a.status==='closed'?1:0,bC=b.status==='closed'?1:0;if(aC!==bC)return aC-bC;return new Date(a.created_at)-new Date(b.created_at);});
-  var noRallyPids=parseIds(sess.no_rally_pids);
+  var latihanPids=parseIds(sess.latihan_pids);
   if(!rallies.length){
-    if(noRallyPids.length>0){
-      el.innerHTML='<div class="empty" style="padding:30px 20px"><div style="font-family:Bebas Neue,sans-serif;font-size:22px;letter-spacing:1.5px;color:var(--acc);margin-bottom:8px">NO RALLY MODE</div><div style="font-size:13px;color:var(--t2)">Sesi latihan bebas. Tidak ada standing.<br/>Cek tab <strong>PAYMENT</strong> untuk split bill.</div></div>';
+    if(latihanPids.length>0){
+      el.innerHTML='<div class="empty" style="padding:30px 20px"><div style="font-family:Bebas Neue,sans-serif;font-size:22px;letter-spacing:1.5px;color:var(--acc);margin-bottom:8px">LATIHAN MODE</div><div style="font-size:13px;color:var(--t2)">Sesi latihan bebas. Tidak ada standing.<br/>Cek tab <strong>PAYMENT</strong> untuk split bill.</div></div>';
     } else {
       el.innerHTML='<div class="empty">No rallies yet.</div>';
     }
@@ -2229,30 +2276,16 @@ function renderPaymentTab(){
     }
 
   } else {
-    // CLOSED BILL MODE -- show split & payment status
-    var sess2=C.sessions.find(function(s){return s.id===sid;});
-    var noRallyPids2=sess2?parseIds(sess2.no_rally_pids):[];
-    var sessionPlayers=getSessionPlayers(sid);
-    var playerMatches={}; var totalMatchSlots=0;
-
-    if(noRallyPids2.length>0){
-      // No-rally mode: split rata ke player yang terdaftar
-      noRallyPids2.forEach(function(pid){
-        playerMatches[pid]=1;
-        totalMatchSlots++;
-      });
-    } else {
-      // Rally mode: hitung dari match done
-      C.matches.filter(function(m){return m.session_id===sid&&m.status==='done';}).forEach(function(m){
-        var all=parseIds(m.team_a).concat(parseIds(m.team_b));
-        all.forEach(function(pid){
-          playerMatches[pid]=(playerMatches[pid]||0)+1;
-          totalMatchSlots++;
-        });
-      });
-    }
-    var ratePerSlot=totalMatchSlots>0?net/totalMatchSlots:0;
-    var playerSlots=playerMatches;
+    // CLOSED BILL MODE -- show split based on saved bill time/latihan
+    var bd = computeBillSplit(sid, {
+      sessionMin: bill.session_minutes || 0,
+      latihanMin: bill.latihan_minutes || 0
+    });
+    var split = bd.split;
+    var totalPaid=payments.reduce(function(s,p){return s+Number(p.amount);},0);
+    var paidCount=payments.length;
+    var doneMatchCount = bd.doneMatchCount;
+    var cancelMatchCount = bd.cancelMatchCount;
 
     html+='<div class="pay-summary">';
     html+='<div class="pay-row"><span class="pay-lbl">COLLECTOR</span><span class="pay-val" style="font-size:12px">'+esc(bill.bank_account)+'</span></div>';
@@ -2260,32 +2293,68 @@ function renderPaymentTab(){
     html+='<div class="pay-row"><span class="pay-lbl">TOTAL BILL</span><span class="pay-val">'+rp(bill.total_bill)+'</span></div>';
     html+='<div class="pay-row"><span class="pay-lbl">DONASI</span><span class="pay-val" style="color:var(--amber)">- '+rp(bill.total_donasi)+'</span></div>';
     html+='<div class="pay-row"><span class="pay-lbl">NETT</span><span class="pay-val big">'+rp(net)+'</span></div>';
-    html+='<div class="pay-row"><span class="pay-lbl">'+(noRallyPids2.length>0?"RATE/PLAYER":"RATE/MATCH")+'</span><span class="pay-val">'+rp(Math.round(ratePerSlot))+'</span></div>';
-    var paidCount=payments.length;
-    var totalPaid=payments.reduce(function(s,p){return s+Number(p.amount);},0);
+
+    // Info section: total matches & latihan
+    if(bd.hasRally || bd.latihanSet){
+      html+='<div class="sep" style="margin:8px 0"></div>';
+      if(bd.hasRally){
+        html+='<div class="pay-row"><span class="pay-lbl">TOTAL MATCH</span><span class="pay-val">'+doneMatchCount+(cancelMatchCount>0?' <span style="color:var(--red);font-size:10px">('+cancelMatchCount+' cancel)</span>':'')+'</span></div>';
+      }
+      if(bd.latihanSet){
+        html+='<div class="pay-row"><span class="pay-lbl">SESI LATIHAN</span><span class="pay-val">'+bd.latihanPids.length+' player'+(bd.latihanMin>0?' &middot; '+bd.latihanMin+' min':'')+'</span></div>';
+      }
+    }
+
+    // Rate info
+    if(bd.latihanPortion>0 && bd.rallyPortion>0){
+      html+='<div class="sep" style="margin:8px 0"></div>';
+      html+='<div class="pay-row"><span class="pay-lbl">LATIHAN</span><span class="pay-val">'+rp(bd.latihanPortion)+' ('+Math.round(bd.latihanMin/bd.sessionMin*100)+'%)</span></div>';
+      html+='<div class="pay-row"><span class="pay-lbl">RATE/PLAYER LATIHAN</span><span class="pay-val" style="font-size:11px">'+rp(Math.round(bd.ratePerLatihanPlayer))+'</span></div>';
+      html+='<div class="pay-row"><span class="pay-lbl">RALLY</span><span class="pay-val">'+rp(bd.rallyPortion)+'</span></div>';
+      html+='<div class="pay-row"><span class="pay-lbl">RATE/MATCH</span><span class="pay-val" style="font-size:11px">'+rp(Math.round(bd.ratePerMatchSlot))+'</span></div>';
+    } else if(bd.latihanPortion>0){
+      html+='<div class="pay-row"><span class="pay-lbl">RATE/PLAYER</span><span class="pay-val">'+rp(Math.round(bd.ratePerLatihanPlayer))+'</span></div>';
+    } else if(bd.rallyPortion>0){
+      html+='<div class="pay-row"><span class="pay-lbl">RATE/MATCH</span><span class="pay-val">'+rp(Math.round(bd.ratePerMatchSlot))+'</span></div>';
+    }
+
     html+='<div class="sep" style="margin:8px 0"></div>';
     html+='<div class="pay-row"><span class="pay-lbl">COLLECTED</span><span class="pay-val green">'+rp(totalPaid)+'</span></div>';
     html+='<div class="pay-row"><span class="pay-lbl">REMAINING</span><span class="pay-val'+(net-totalPaid>0?' red':'')+'">'+rp(net-totalPaid)+'</span></div>';
     var pct=net>0?Math.min(100,Math.round(totalPaid/net*100)):0;
     html+='<div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%"></div></div>';
-    html+='<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--t3);margin-top:4px;text-align:right">'+paidCount+'/'+Object.keys(playerSlots).length+' paid</div>';
+    html+='<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--t3);margin-top:4px;text-align:right">'+paidCount+'/'+Object.keys(split).length+' paid</div>';
     html+='</div>';
 
     html+='<div class="sec-title">PLAYER SPLIT</div>';
-    Object.keys(playerSlots).sort().forEach(function(pid){
-      var slots=playerSlots[pid];
-      var amount=Math.round(ratePerSlot*slots);
+    var splitPids = Object.keys(split).sort(function(a,b){return split[b]-split[a];});
+    splitPids.forEach(function(pid){
+      var amount=split[pid];
       var paid=payments.find(function(p){return p.player_id===pid;});
       var isPaid=!!paid;
+      var inLatihan = bd.latihanPids.indexOf(pid)>-1;
+      var matchCnt = bd.matchSlots[pid]||0;
+      // Build detail label
+      var detail = '';
+      if(bd.latihanPortion>0 && bd.rallyPortion>0){
+        var parts=[];
+        if(inLatihan) parts.push('latihan');
+        if(matchCnt>0) parts.push(matchCnt+' match');
+        detail = parts.join(' + ');
+      } else if(bd.latihanPortion>0){
+        detail = 'split rata';
+      } else {
+        detail = matchCnt+' match';
+      }
       html+='<div class="split-card '+(isPaid?'paid':'unpaid')+'">';
       html+='<div><div style="font-size:14px;font-weight:500">'+esc(pname(pid))+'</div>';
-      html+='<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--t3);margin-top:1px">'+(noRallyPids2.length>0?'split rata':slots+' match &times; '+rp(Math.round(ratePerSlot)))+' = <strong>'+rp(amount)+'</strong></div>';
+      html+='<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--t3);margin-top:1px">'+detail+' = <strong>'+rp(amount)+'</strong></div>';
       if(isPaid)html+='<div style="font-family:DM Mono,monospace;font-size:10px;color:var(--green);margin-top:2px">via '+paid.method+'</div>';
       html+='</div>';
       html+='<div style="text-align:right">';
       html+='<div style="font-family:DM Mono,monospace;font-size:13px;color:'+(isPaid?'var(--green)':'var(--red)')+'">'+rp(amount)+'</div>';
       if(isPaid){html+='<span class="badge ba" style="margin-top:4px">PAID</span>';}
-      else{html+='<button class="btn b-sm" style="margin-top:4px;background:var(--red-dim);color:var(--red);border:1px solid var(--red)" onclick="openPayConfirm(\''+pid+'\',\''+bill.id+'\','+amount+','+slots+')">Bayar</button>';}
+      else{html+='<button class="btn b-sm" style="margin-top:4px;background:var(--red-dim);color:var(--red);border:1px solid var(--red)" onclick="openPayConfirm(\''+pid+'\',\''+bill.id+'\','+amount+','+matchCnt+')">Bayar</button>';}
       html+='</div></div>';
     });
   }
@@ -2375,54 +2444,310 @@ function openCloseBill(){
   }
   _openCloseBillInner();
 }
-function _openCloseBillInner(){
-  var sid=S.activeSid;
-  var entries=C.billEntries[sid]||[];
-  var donations=C.donationEntries[sid]||[];
-  var totalBill=entries.reduce(function(s,e){return s+Number(e.total);},0);
-  var totalDonasi=donations.reduce(function(s,d){return s+Number(d.total);},0);
-  var net=totalBill-totalDonasi;
+// ============================================================
+// NEW SPLIT BILL FORMULA
+// Scenarios:
+//  A) Only latihan, no rally: split rata by latihan_pids. No time needed.
+//  B) Only rally, no latihan: split by match count (existing logic). No time.
+//  C) Both: split by time. Latihan portion -> rata ke latihan pids.
+//     Rally portion -> per match count like before.
+//     Player in both pays both portions.
+// ============================================================
+function computeBillSplit(sid, opts){
+  // opts = {sessionMin, latihanMin, latihanPidsOverride}
+  opts = opts || {};
+  var sess = C.sessions.find(function(s){return s.id===sid;});
+  var entries = C.billEntries[sid] || [];
+  var donations = C.donationEntries[sid] || [];
+  var totalBill = entries.reduce(function(s,e){return s+Number(e.total);},0);
+  var totalDonasi = donations.reduce(function(s,d){return s+Number(d.total);},0);
+  var net = totalBill - totalDonasi;
+  var rallies = C.rallies.filter(function(r){return r.session_id===sid;});
+  var hasRally = rallies.length > 0;
 
-  // Split calculation - handle no-rally mode
-  var sess3=C.sessions.find(function(s){return s.id===sid;});
-  var noRallyPids3=sess3?parseIds(sess3.no_rally_pids):[];
-  var playerSlots={}; var totalSlots=0;
-  if(noRallyPids3.length>0){
-    noRallyPids3.forEach(function(pid){playerSlots[pid]=1;totalSlots++;});
-  } else {
-    C.matches.filter(function(m){return m.session_id===sid&&m.status==='done';}).forEach(function(m){
-      parseIds(m.team_a).concat(parseIds(m.team_b)).forEach(function(pid){
-        playerSlots[pid]=(playerSlots[pid]||0)+1;
-        totalSlots++;
-      });
+  // Determine latihan_pids (override > session) and whether active
+  var latihanSet = opts.latihanPidsOverride !== undefined ? true : (sess && sess.latihan_pids !== null && sess.latihan_pids !== undefined);
+  var latihanPidsRaw = opts.latihanPidsOverride !== undefined ? opts.latihanPidsOverride : (sess ? parseIds(sess.latihan_pids) : []);
+
+  // Expand latihan pids: if empty, means "all rally players"
+  var latihanPids = latihanPidsRaw.length > 0 ? latihanPidsRaw : (hasRally ? getAllRallyPids(rallies) : []);
+
+  // Count match slots (done, non-void)
+  var matchSlots = {}; var totalMatchSlots = 0;
+  C.matches.filter(function(m){return m.session_id===sid&&m.status==='done';}).forEach(function(m){
+    parseIds(m.team_a).concat(parseIds(m.team_b)).forEach(function(pid){
+      matchSlots[pid] = (matchSlots[pid]||0)+1;
+      totalMatchSlots++;
+    });
+  });
+  var totalMatches = Math.floor(totalMatchSlots / (rallies.some(function(r){return r.type==='double';}) ? 2 : 2)); // rough; each match = 2 or 4 slots
+
+  // Determine scenario
+  var sessionMin = Number(opts.sessionMin) || 0;
+  var latihanMin = Number(opts.latihanMin) || 0;
+
+  var split = {}; // pid -> amount
+  var latihanPortion = 0, rallyPortion = 0;
+  var ratePerMatchSlot = 0, ratePerLatihanPlayer = 0;
+
+  if (latihanSet && hasRally && sessionMin > 0 && latihanMin > 0) {
+    // Scenario C: both, use time
+    var latihanRatio = latihanMin / sessionMin;
+    if (latihanRatio > 1) latihanRatio = 1;
+    latihanPortion = Math.round(net * latihanRatio);
+    rallyPortion = net - latihanPortion;
+    ratePerLatihanPlayer = latihanPids.length > 0 ? latihanPortion / latihanPids.length : 0;
+    ratePerMatchSlot = totalMatchSlots > 0 ? rallyPortion / totalMatchSlots : 0;
+
+    latihanPids.forEach(function(pid){
+      split[pid] = (split[pid]||0) + ratePerLatihanPlayer;
+    });
+    Object.keys(matchSlots).forEach(function(pid){
+      split[pid] = (split[pid]||0) + matchSlots[pid] * ratePerMatchSlot;
+    });
+
+  } else if (latihanSet && !hasRally) {
+    // Scenario A: only latihan
+    latihanPortion = net;
+    ratePerLatihanPlayer = latihanPids.length > 0 ? net / latihanPids.length : 0;
+    latihanPids.forEach(function(pid){
+      split[pid] = ratePerLatihanPlayer;
+    });
+
+  } else if (hasRally && !latihanSet) {
+    // Scenario B: only rally
+    rallyPortion = net;
+    ratePerMatchSlot = totalMatchSlots > 0 ? net / totalMatchSlots : 0;
+    Object.keys(matchSlots).forEach(function(pid){
+      split[pid] = matchSlots[pid] * ratePerMatchSlot;
+    });
+
+  } else if (latihanSet && hasRally) {
+    // Both but no time input yet - preview as rally only
+    rallyPortion = net;
+    ratePerMatchSlot = totalMatchSlots > 0 ? net / totalMatchSlots : 0;
+    Object.keys(matchSlots).forEach(function(pid){
+      split[pid] = matchSlots[pid] * ratePerMatchSlot;
     });
   }
-  var ratePerSlot=totalSlots>0?net/totalSlots:0;
 
-  document.getElementById('inp-close-bank').value='';
-  var sum='Total Bill: '+rp(totalBill)+'\n'+'Donasi: '+rp(totalDonasi)+'\n'+'Nett: '+rp(net)+'\n\nSplit per player:\n';
-  Object.keys(playerSlots).forEach(function(pid){
-    var slots=playerSlots[pid];
-    sum+=pname(pid)+': '+slots+' match \u00d7 '+rp(Math.round(ratePerSlot))+' = '+rp(Math.round(ratePerSlot*slots))+'\n';
+  // Round
+  Object.keys(split).forEach(function(pid){
+    split[pid] = Math.round(split[pid]);
   });
-  document.getElementById('close-bill-summary').textContent=sum;
-  S._closeBillData={totalBill:totalBill,totalDonasi:totalDonasi};
+
+  return {
+    totalBill: totalBill, totalDonasi: totalDonasi, net: net,
+    hasRally: hasRally, latihanSet: latihanSet,
+    latihanPids: latihanPids, matchSlots: matchSlots,
+    totalMatchSlots: totalMatchSlots,
+    doneMatchCount: C.matches.filter(function(m){return m.session_id===sid&&m.status==='done';}).length,
+    cancelMatchCount: C.matches.filter(function(m){return m.session_id===sid&&m.status==='void';}).length,
+    sessionMin: sessionMin, latihanMin: latihanMin,
+    latihanPortion: latihanPortion, rallyPortion: rallyPortion,
+    ratePerMatchSlot: ratePerMatchSlot, ratePerLatihanPlayer: ratePerLatihanPlayer,
+    split: split
+  };
+}
+
+// State during close-bill flow
+var CB = { latihanChoice: null, latihanPidsOverride: undefined };
+
+function _openCloseBillInner(){
+  var sid=S.activeSid;
+  var sess = C.sessions.find(function(s){return s.id===sid;});
+  var rallies = C.rallies.filter(function(r){return r.session_id===sid;});
+  var hasRally = rallies.length > 0;
+  var latihanSet = sess && sess.latihan_pids !== null && sess.latihan_pids !== undefined;
+
+  // Reset CB state
+  CB.latihanChoice = null;
+  CB.latihanPidsOverride = undefined;
+
+  document.getElementById('inp-close-bank').value = '';
+  document.getElementById('inp-session-min').value = '';
+  document.getElementById('inp-latihan-min').value = '';
+
+  // Show/hide latihan prompt
+  var askEl = document.getElementById('cb-latihan-ask');
+  if (hasRally && !latihanSet) {
+    askEl.classList.remove('hidden');
+    document.querySelectorAll('[data-cb-latihan]').forEach(function(el){
+      el.classList.toggle('on', el.dataset.cbLatihan==='no');
+    });
+    CB.latihanChoice = 'no';
+  } else {
+    askEl.classList.add('hidden');
+  }
+
+  // Show time input if: latihan set AND rally exists
+  updateCBVisibility();
+  updateCBSummary();
   openOv('close-bill');
+}
+
+function setCBLatihan(val) {
+  CB.latihanChoice = val;
+  document.querySelectorAll('[data-cb-latihan]').forEach(function(el){
+    el.classList.toggle('on', el.dataset.cbLatihan===val);
+  });
+  if (val === 'yes') {
+    // Show player list (optional)
+    CB.latihanPidsOverride = [];
+    renderCBLatihanList();
+  } else {
+    CB.latihanPidsOverride = undefined;
+  }
+  updateCBVisibility();
+  updateCBSummary();
+}
+
+function renderCBLatihanList() {
+  var el = document.getElementById('cb-latihan-list');
+  if (!el) return;
+  var html = '';
+  C.players.slice().sort(function(a,b){return Number(b.level)-Number(a.level);}).forEach(function(p){
+    var lv = p.level_label || levelLabel(p.level);
+    var sel = (CB.latihanPidsOverride||[]).indexOf(p.id) > -1;
+    html += '<div class="psel-item'+(sel?' selected':'')+'" onclick="toggleCBLatihanPid(\''+p.id+'\')" style="cursor:pointer">';
+    html += '<div class="psel-left"><span class="badge blv'+lv+'">'+lv+'</span>';
+    html += '<div><div class="psel-name">'+esc(p.name)+'</div></div></div>';
+    html += '<input type="checkbox" '+(sel?'checked':'')+' style="width:16px;height:16px;pointer-events:none;accent-color:var(--acc)"/>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function toggleCBLatihanPid(pid) {
+  if (!CB.latihanPidsOverride) CB.latihanPidsOverride = [];
+  var idx = CB.latihanPidsOverride.indexOf(pid);
+  if (idx > -1) CB.latihanPidsOverride.splice(idx, 1);
+  else CB.latihanPidsOverride.push(pid);
+  renderCBLatihanList();
+  updateCBSummary();
+}
+
+function updateCBVisibility() {
+  var sid = S.activeSid;
+  var sess = C.sessions.find(function(s){return s.id===sid;});
+  var rallies = C.rallies.filter(function(r){return r.session_id===sid;});
+  var hasRally = rallies.length > 0;
+  var latihanSet = (sess && sess.latihan_pids !== null && sess.latihan_pids !== undefined) || CB.latihanChoice === 'yes';
+
+  // Player list only if user said "yes" from prompt
+  document.getElementById('cb-latihan-players').classList.toggle('hidden', CB.latihanChoice !== 'yes');
+  // Time inputs only if both latihan AND rally exist
+  document.getElementById('cb-time-wrap').classList.toggle('hidden', !(latihanSet && hasRally));
+}
+
+function updateCBSummary() {
+  var sid = S.activeSid;
+  var sessionMin = Number(document.getElementById('inp-session-min').value) || 0;
+  var latihanMin = Number(document.getElementById('inp-latihan-min').value) || 0;
+  var result = computeBillSplit(sid, {
+    sessionMin: sessionMin, latihanMin: latihanMin,
+    latihanPidsOverride: CB.latihanChoice === 'yes' ? (CB.latihanPidsOverride||[]) : undefined
+  });
+
+  var sum = '';
+  sum += 'Total Bill: '+rp(result.totalBill)+'\n';
+  sum += 'Donasi:     '+rp(result.totalDonasi)+'\n';
+  sum += 'NETT:       '+rp(result.net)+'\n';
+  sum += '\n';
+
+  if (result.latihanPortion > 0 && result.rallyPortion > 0) {
+    sum += '--- SPLIT BY WAKTU ---\n';
+    sum += 'Latihan ('+latihanMin+'/'+sessionMin+' mnt): '+rp(result.latihanPortion)+'\n';
+    sum += '  -> '+result.latihanPids.length+' player @ '+rp(Math.round(result.ratePerLatihanPlayer))+'\n';
+    sum += 'Rally: '+rp(result.rallyPortion)+'\n';
+    sum += '  -> '+result.totalMatchSlots+' slot @ '+rp(Math.round(result.ratePerMatchSlot))+'\n';
+  } else if (result.latihanPortion > 0) {
+    sum += 'Latihan: split rata '+result.latihanPids.length+' player\n';
+    sum += '  @ '+rp(Math.round(result.ratePerLatihanPlayer))+'\n';
+  } else if (result.rallyPortion > 0) {
+    sum += 'Rally: per match count\n';
+    sum += '  '+result.totalMatchSlots+' slot @ '+rp(Math.round(result.ratePerMatchSlot))+'\n';
+  }
+
+  sum += '\n--- PER PLAYER ---\n';
+  var allPids = Object.keys(result.split);
+  allPids.sort(function(a,b){return result.split[b]-result.split[a];});
+  allPids.forEach(function(pid){
+    sum += pname(pid).padEnd ? pname(pid).padEnd(14) : pname(pid)+': ';
+    sum += rp(result.split[pid])+'\n';
+  });
+
+  document.getElementById('close-bill-summary').textContent = sum;
+  S._closeBillData = {
+    totalBill: result.totalBill, totalDonasi: result.totalDonasi,
+    sessionMin: sessionMin, latihanMin: latihanMin,
+    latihanPidsOverride: CB.latihanPidsOverride
+  };
 }
 async function doCloseBill(){
   var bank=document.getElementById('inp-close-bank').value.trim();
   if(!bank){toast('Enter bank account','err');return;}
+  var sid=S.activeSid;
+  var sess=C.sessions.find(function(s){return s.id===sid;});
+  var rallies=C.rallies.filter(function(r){return r.session_id===sid;});
+  var hasRally=rallies.length>0;
+  var latihanSet=(sess&&sess.latihan_pids!==null&&sess.latihan_pids!==undefined)||CB.latihanChoice==='yes';
+
+  // Validate time inputs if needed
+  if(latihanSet && hasRally){
+    var sm=Number(document.getElementById('inp-session-min').value);
+    var lm=Number(document.getElementById('inp-latihan-min').value);
+    if(!sm||!lm){toast('Input waktu session & latihan (menit)','err');return;}
+    if(lm>=sm){toast('Waktu latihan harus lebih kecil dari total session','err');return;}
+  }
+
   setBtn('btn-do-close-bill',true);
   try{
-    var bill=await DB.closeBill(S.activeSid,bank,S._closeBillData.totalBill,S._closeBillData.totalDonasi);
-    C.bills[S.activeSid]=bill;
-    var sess=C.sessions.find(function(s){return s.id===S.activeSid;});
+    var d=S._closeBillData;
+    // If user chose "yes" in close-bill prompt, save latihan_pids to session
+    if(CB.latihanChoice==='yes' && sess && (sess.latihan_pids===null||sess.latihan_pids===undefined)){
+      await fetch(SUPA_URL+'/rest/v1/sessions?id=eq.'+sid,{
+        method:'PATCH',
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+        body:JSON.stringify({latihan_pids:CB.latihanPidsOverride||[]})
+      });
+      sess.latihan_pids=(CB.latihanPidsOverride||[]).slice();
+    }
+
+    // Close bill WITH time fields
+    var billPayload={
+      session_id:sid,
+      bank_account:bank,
+      total_bill:d.totalBill,
+      total_donasi:d.totalDonasi,
+      status:'closed',
+      closed_at:new Date().toISOString(),
+    };
+    if(d.sessionMin&&d.latihanMin){
+      billPayload.session_minutes=d.sessionMin;
+      billPayload.latihan_minutes=d.latihanMin;
+    }
+    if(sess&&sess.latihan_pids!==null&&sess.latihan_pids!==undefined){
+      billPayload.latihan_pids=sess.latihan_pids;
+    }
+    var res=await fetch(SUPA_URL+'/rest/v1/bills',{
+      method:'POST',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
+      body:JSON.stringify(billPayload)
+    });
+    if(!res.ok)throw new Error(await res.text());
+    var rows=await res.json();
+    var bill=Array.isArray(rows)?rows[0]:rows;
+    C.bills[sid]=bill;
+    // Close session
+    await DB.closeSession(sid);
     if(sess)sess.status='closed';
+
     closeOv('close-bill');toast('Bill closed! Session closed.','ok');
     await loadAndRenderPayment();
     renderMatchTab();
     renderSessionList();
-  }catch(err){toast(err.message,'err');}
+  }catch(err){toast(err.message,'err');console.error(err);}
   finally{setBtn('btn-do-close-bill',false);}
 }
 
@@ -2484,19 +2809,12 @@ function getPlayerStats(pid){
   C.sessions.forEach(function(s){
     var bill=C.bills[s.id];
     if(!bill||bill.status!=='closed')return;
-    // Count done matches by player in this session
-    var playerSlots={};
-    var totalSlots=0;
-    C.matches.filter(function(m){return m.session_id===s.id&&m.status==='done';}).forEach(function(m){
-      parseIds(m.team_a).concat(parseIds(m.team_b)).forEach(function(id){
-        playerSlots[id]=(playerSlots[id]||0)+1;
-        totalSlots++;
-      });
+    var bd = computeBillSplit(s.id, {
+      sessionMin: bill.session_minutes || 0,
+      latihanMin: bill.latihan_minutes || 0
     });
-    if(!playerSlots[pid])return;
-    var net=Number(bill.total_bill)-Number(bill.total_donasi);
-    var rate=totalSlots>0?net/totalSlots:0;
-    var amount=Math.round(rate*playerSlots[pid]);
+    var amount = bd.split[pid];
+    if (!amount) return;
     var paid=(C.playerPayments[s.id]||[]).find(function(p){return p.player_id===pid;});
     if(!paid)debt+=amount;
   });
@@ -3221,67 +3539,171 @@ async function saveQuickEditPlayer() {
 // ============================================
 
 // ============================================================
-// NO RALLY MODE (session latihan, bill split rata)
+// LATIHAN MODE (session latihan, bill split rata)
 // ============================================================
-var NR = { pids: [] };
+var LAT = { pids: [], mode: "required" };
 
-function openNoRally() {
+function openLatihan() {
   var sess = C.sessions.find(function(s){return s.id===S.activeSid;});
   if (!sess) return;
-  // Check if any rally exists (must be zero)
   var rallies = C.rallies.filter(function(r){return r.session_id===sess.id;});
-  if (rallies.length > 0) { toast('Sudah ada rally, tidak bisa no-rally','err'); return; }
-  NR.pids = parseIds(sess.no_rally_pids);
-  renderNRList();
-  openOv('no-rally');
+  LAT.pids = sess.latihan_pids ? parseIds(sess.latihan_pids) : [];
+  LAT.mode = rallies.length > 0 ? 'optional' : 'required';
+  renderLatihanList();
+  openOv('latihan');
 }
 
-function renderNRList() {
+function renderLatihanList() {
+  // Update helper text based on mode
+  var hint = document.getElementById('latihan-hint');
+  if (hint) {
+    if (LAT.mode === 'required') {
+      hint.innerHTML = 'Belum ada rally. Pilih player yang hadir latihan (<strong>wajib</strong>). Bill split rata.';
+      hint.style.color = 'var(--t2)';
+    } else {
+      hint.innerHTML = 'Sesi latihan <strong>bersama rally</strong>. Pilih player spesifik, atau kosongkan untuk <strong>semua player rally</strong> ikut latihan.';
+      hint.style.color = 'var(--t2)';
+    }
+  }
+
   var html = '';
   C.players.slice().sort(function(a,b){return Number(b.level)-Number(a.level);}).forEach(function(p){
     var lv = p.level_label || levelLabel(p.level);
-    var sel = NR.pids.indexOf(p.id) > -1;
-    html += '<div class="psel-item'+(sel?' selected':'')+'" onclick="toggleNRPid(\''+p.id+'\')" style="cursor:pointer">';
+    var sel = LAT.pids.indexOf(p.id) > -1;
+    html += '<div class="psel-item'+(sel?' selected':'')+'" onclick="toggleLatihanPid(\''+p.id+'\')" style="cursor:pointer">';
     html += '<div class="psel-left"><span class="badge blv'+lv+'">'+lv+'</span>';
     html += '<div><div class="psel-name">'+esc(p.name)+'</div><div class="psel-sub">'+p.level+'</div></div></div>';
     html += '<input type="checkbox" '+(sel?'checked':'')+' style="width:18px;height:18px;pointer-events:none;accent-color:var(--acc)"/>';
     html += '</div>';
   });
-  document.getElementById('nr-player-list').innerHTML = html;
-  document.getElementById('nr-preview').textContent = NR.pids.length > 0
-    ? NR.pids.length + ' player akan split bill rata'
-    : 'Pilih minimal 1 player';
+  document.getElementById('latihan-player-list').innerHTML = html;
+
+  var prev = document.getElementById('latihan-preview');
+  if (LAT.mode === 'required') {
+    prev.textContent = LAT.pids.length > 0 ? LAT.pids.length + ' player' : 'Pilih minimal 1 player';
+    prev.style.color = LAT.pids.length > 0 ? 'var(--acc)' : 'var(--red)';
+  } else {
+    prev.textContent = LAT.pids.length > 0 ? LAT.pids.length + ' player terpilih' : 'Kosong = semua player rally ikut latihan';
+    prev.style.color = 'var(--acc)';
+  }
 }
 
-function toggleNRPid(pid) {
-  var idx = NR.pids.indexOf(pid);
-  if (idx > -1) NR.pids.splice(idx, 1);
-  else NR.pids.push(pid);
-  renderNRList();
+function toggleLatihanPid(pid) {
+  var idx = LAT.pids.indexOf(pid);
+  if (idx > -1) LAT.pids.splice(idx, 1);
+  else LAT.pids.push(pid);
+  renderLatihanList();
 }
 
-async function confirmNoRally() {
-  if (!NR.pids.length) { toast('Pilih minimal 1 player','err'); return; }
-  setBtn('btn-nr-confirm', true);
+async function confirmLatihan() {
+  if (LAT.mode === 'required' && !LAT.pids.length) {
+    toast('Pilih minimal 1 player','err');
+    return;
+  }
+  setBtn('btn-latihan-confirm', true);
   try {
     var sess = C.sessions.find(function(s){return s.id===S.activeSid;});
     await fetch(SUPA_URL+'/rest/v1/sessions?id=eq.'+sess.id, {
       method: 'PATCH',
       headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
-      body: JSON.stringify({no_rally_pids: NR.pids})
+      body: JSON.stringify({latihan_pids: LAT.pids})
     });
-    sess.no_rally_pids = NR.pids.slice();
-    closeOv('no-rally');
-    toast('Saved, '+NR.pids.length+' player','ok');
+    sess.latihan_pids = LAT.pids.slice();
+    closeOv('latihan');
+    toast('Sesi latihan saved','ok');
     renderMatchTab(); renderPaymentTab();
   } catch(err) { toast(err.message,'err'); }
-  finally { setBtn('btn-nr-confirm', false); }
+  finally { setBtn('btn-latihan-confirm', false); }
 }
 
-function openQuickAddNR() {
+async function clearLatihan() {
+  if (!confirm('Hapus sesi latihan?')) return;
+  try {
+    var sess = C.sessions.find(function(s){return s.id===S.activeSid;});
+    await fetch(SUPA_URL+'/rest/v1/sessions?id=eq.'+sess.id, {
+      method: 'PATCH',
+      headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({latihan_pids: null})
+    });
+    sess.latihan_pids = null;
+    closeOv('latihan');
+    toast('Latihan cleared','ok');
+    renderMatchTab(); renderPaymentTab();
+  } catch(err) { toast(err.message,'err'); }
+}
+
+function getAllRallyPids(rallies) {
+  var set = {};
+  rallies.forEach(function(r){
+    parseIds(r.player_ids).forEach(function(pid){set[pid]=1;});
+  });
+  return Object.keys(set);
+}
+
+function openQuickAddLatihan() {
   document.getElementById('inp-qpname').value = '';
   S._quickAddRefresh = 'nr';
   openOv('quick-player');
+}
+
+
+// ============================================================
+// EDIT SESSION (from hero)
+// ============================================================
+function openEditSession() {
+  var sess = C.sessions.find(function(s){return s.id===S.activeSid;});
+  if (!sess) return;
+  document.getElementById('es-name').value = sess.name || '';
+  document.getElementById('es-date').value = sess.date || '';
+  document.getElementById('es-venue').value = sess.venue || '';
+  // Can delete? Only if no bill closed
+  var bill = C.bills && C.bills[sess.id];
+  var canDelete = !bill || bill.status !== 'closed';
+  var btnDel = document.getElementById('btn-es-delete');
+  var note = document.getElementById('es-delete-note');
+  if (canDelete) {
+    btnDel.disabled = false;
+    btnDel.style.opacity = '1';
+    note.textContent = '';
+  } else {
+    btnDel.disabled = true;
+    btnDel.style.opacity = '0.4';
+    note.textContent = 'Bill sudah closed, tidak bisa hapus';
+  }
+  openOv('edit-session');
+}
+
+async function saveEditSession() {
+  var sess = C.sessions.find(function(s){return s.id===S.activeSid;});
+  if (!sess) return;
+  var name = document.getElementById('es-name').value.trim();
+  var date = document.getElementById('es-date').value;
+  var venue = document.getElementById('es-venue').value.trim();
+  if (!name) { toast('Name required','err'); return; }
+  if (!date) { toast('Date required','err'); return; }
+  setBtn('btn-es-save', true);
+  try {
+    await fetch(SUPA_URL+'/rest/v1/sessions?id=eq.'+sess.id, {
+      method: 'PATCH',
+      headers: {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({name: name, date: date, venue: venue})
+    });
+    sess.name = name; sess.date = date; sess.venue = venue;
+    closeOv('edit-session');
+    toast('Session updated','ok');
+    renderMatchTab(); renderSessionList();
+    document.getElementById('detail-sess-name').textContent = name;
+  } catch(err) { toast(err.message,'err'); }
+  finally { setBtn('btn-es-save', false); }
+}
+
+function deleteSessionFromEdit() {
+  var sess = C.sessions.find(function(s){return s.id===S.activeSid;});
+  if (!sess) return;
+  closeOv('edit-session');
+  S._delSid = sess.id;
+  document.getElementById('del-sess-name').textContent = sess.name;
+  openOv('del-session');
 }
 
 // ============================================================
